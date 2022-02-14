@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="X-UA-Compatible"
+      content="IE=edge"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bellota:ital,wght@1,300&family=Bubbler+One&family=Cinzel+Decorative&family=The+Girl+Next+Door&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+
+    <script defer src="app.js"></script>
+    <title>Task List App</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="grid">
+        <h1 class="title">Task List</h1>
+
+        <section class="adding-task">
+          <h2 class="adding-task-title">
+            Add New Magical Task
+            <span class="magical-wand-icon"
+              ><img
+                src="https://img.icons8.com/external-icongeek26-linear-colour-icongeek26/36/000000/external-wand-magic-and-fairy-tale-icongeek26-linear-colour-icongeek26-2.png"
+            /></span>
+          </h2>
+
+          <div class="display-tasks">
+            DISPLAY TASKS HERE
+            <ul class="tasks"></ul>
+          </div>
+
+          <form
+            id="task-form"
+            action="index.html"
+          >
+            <div
+              class="task-form-container grid-2-cols"
+            >
+              <div class="task-labels">
+                <label>Task Title:</label>
+                <label>Task Expires:</label>
+                <label>Date of Task:</label>
+              </div>
+              <div class="task-inputs">
+                <input type="text" required />
+                <input type="time" required />
+                <input type="date" required />
+              </div>
+            </div>
+            <button type="submit" class="btn">
+              Add Task
+            </button>
+          </form>
+        </section>
+
+        <section id="logging-db-status">
+          <div class="logging-container">
+            <ul class="logs"></ul>
+          </div>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>
