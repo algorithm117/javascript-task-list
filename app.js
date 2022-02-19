@@ -99,6 +99,21 @@ function setNotification(task) {
           title,
           options
         );
+
+        // vibration api
+        navigator.vibrate =
+          navigator.vibrate ||
+          navigator.webkitVibrate ||
+          navigator.mozVibrate ||
+          navigator.msVibrate;
+
+        if (navigator.vibrate) {
+          navigator.vibrate([
+            50, 100, 50, 100, 50, 100, 400, 100,
+            300, 100, 350, 50, 200, 100, 100, 50,
+            600,
+          ]);
+        }
       }, setTimeoutMilliseconds);
     }
   }
