@@ -44,39 +44,177 @@
           </h2>
 
           <div class="display-tasks">
-            <ul class="tasks">
-              <li>
-                You have no tasks
-                <span class="confetti-icon"
-                  ><img
-                    src="confetti.png"
-                    alt="confetti"
-                /></span>
-              </li>
-            </ul>
+            <ul class="tasks"></ul>
           </div>
 
           <form
             id="task-form"
             action="index.html"
           >
-            <div
-              class="task-form-container grid-2-cols"
-            >
-              <div class="task-labels">
+            <div class="task-form-container">
+              <div class="task-title-user-input">
                 <label>Task Title:</label>
-                <label>Task Expires:</label>
-                <label>Date of Task:</label>
+                <input
+                  type="text"
+                  class="task-title-input"
+                  required
+                />
               </div>
-              <div class="task-inputs">
-                <input type="text" required />
-                <input type="time" required />
-                <input type="date" required />
+
+              <div class="task-time-user-input">
+                <div class="task-time-hours">
+                  <label>Hours (hh):</label>
+                </div>
+                <input
+                  type="number"
+                  min="0"
+                  max="12"
+                  class="task-hours"
+                  required
+                />
+
+                <div class="task-time-minutes">
+                  <label>Mins (mm):</label>
+                </div>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  class="task-minutes"
+                  required
+                />
+
+                <select class="am-pm" required>
+                  <option value="AM">AM</option>
+                  <option value="PM">PM</option>
+                </select>
+              </div>
+
+              <div class="task-date-user-input">
+                <div class="day">
+                  <label>Day:</label>
+                  <select
+                    class="select-day"
+                    required
+                  >
+                    <option value="01">01</option>
+                    <option value="02">02</option>
+                    <option value="03">03</option>
+                    <option value="04">04</option>
+                    <option value="05">05</option>
+                    <option value="06">06</option>
+                    <option value="07">07</option>
+                    <option value="08">08</option>
+                    <option value="09">09</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                    <option value="15">15</option>
+                    <option value="16">16</option>
+                    <option value="17">17</option>
+                    <option value="18">18</option>
+                    <option value="19">19</option>
+                    <option value="20">20</option>
+                    <option value="21">21</option>
+                    <option value="22">22</option>
+                    <option value="23">23</option>
+                    <option value="24">24</option>
+                    <option value="25">25</option>
+                    <option value="26">26</option>
+                    <option value="27">27</option>
+                    <option value="28">28</option>
+                    <option value="29">29</option>
+                    <option value="30">30</option>
+                    <option value="31">31</option>
+                  </select>
+                </div>
+
+                <div class="month">
+                  <label>Month:</label>
+                  <select
+                    class="select-month"
+                    required
+                  >
+                    <option value="January">
+                      January
+                    </option>
+                    <option value="February">
+                      February
+                    </option>
+                    <option value="March">
+                      March
+                    </option>
+                    <option value="April">
+                      April
+                    </option>
+                    <option value="May">
+                      May
+                    </option>
+                    <option value="June">
+                      June
+                    </option>
+                    <option value="July">
+                      July
+                    </option>
+                    <option value="August">
+                      August
+                    </option>
+                    <option value="September">
+                      September
+                    </option>
+                    <option value="October">
+                      October
+                    </option>
+                    <option value="November">
+                      November
+                    </option>
+                    <option value="December">
+                      December
+                    </option>
+                  </select>
+                </div>
+
+                <div class="year">
+                  <label>Year:</label>
+                  <select
+                    class="select-year"
+                    required
+                  >
+                    <option value="2022">
+                      2022
+                    </option>
+                    <option value="2023">
+                      2023
+                    </option>
+                    <option value="2024">
+                      2024
+                    </option>
+                    <option value="2025">
+                      2025
+                    </option>
+                    <option value="2026">
+                      2026
+                    </option>
+                    <option value="2027">
+                      2027
+                    </option>
+                  </select>
+                </div>
               </div>
             </div>
-            <button type="submit" class="btn">
-              Add Task
-            </button>
+            <div class="btn-container">
+              <button type="submit" class="btn">
+                Add Task
+              </button>
+              <button
+                type="button"
+                class="btn-clear"
+              >
+                To remove all tasks
+              </button>
+            </div>
           </form>
         </section>
 

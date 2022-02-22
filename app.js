@@ -9,6 +9,9 @@ const taskForm =
 
 const logsUl = document.querySelector('.logs');
 
+const btnClear =
+  document.querySelector('.btn-clear');
+
 let db = null,
   objectStore = null,
   DBOpenReq = null;
@@ -47,10 +50,22 @@ function getPermission() {
 function setNotification(task) {
   let { taskTitle, taskTime, taskDate } = task;
 
-  const millisecondsPerDay = 1000 * 60 * 60 * 24;
+  const sameDay = checkForSameDay(taskDate);
 
-  taskDate = new Date(formatDate(taskDate));
+  // create notification only on day task is due
+  if (sameDay) {
+    const setTimeoutMilliseconds =
+      calculateMilliseconds(taskTime);
 
+    // set notification for future tasks and not past tasks
+    if (setTimeoutMilliseconds >= 0) {
+      createSetTimeoutForNotification(taskTitle);
+    }
+  }
+}
+
+function checkForSameDay(taskDate) {
+  taskDate = new Date(taskDate);
   const currentDate = new Date();
 
   const utc1 = Date.UTC(
@@ -65,58 +80,58 @@ function setNotification(task) {
     currentDate.getDate()
   );
 
-  const sameDay = utc1 - utc2;
+  return utc1 - utc2 === 0;
+}
 
-  // create notification only on day task is due
-  if (sameDay === 0) {
-    let taskDateMilliseconds =
-      Number(taskTime.split(':')[0]) *
-        60 *
-        60 *
-        1000 +
-      Number(taskTime.split(':')[1]) * 60 * 1000;
+function calculateMilliseconds(taskTime) {
+  const taskDateMilliseconds =
+    Number(taskTime.split(':')[0]) *
+      60 *
+      60 *
+      1000 +
+    Number(taskTime.split(':')[1]) * 60 * 1000;
 
-    let dateNow = new Date();
-    let currentTimeMilliseconds =
-      dateNow.getHours() * 60 * 60 * 1000 +
-      dateNow.getMinutes() * 60 * 1000;
+  const dateNow = new Date();
+  const currentTimeMilliseconds =
+    dateNow.getHours() * 60 * 60 * 1000 +
+    dateNow.getMinutes() * 60 * 1000;
 
-    let setTimeoutMilliseconds =
-      taskDateMilliseconds -
-      currentTimeMilliseconds;
+  const setTimeoutMilliseconds =
+    taskDateMilliseconds -
+    currentTimeMilliseconds;
 
-    // set notification for future tasks and not past tasks
-    if (setTimeoutMilliseconds >= 0) {
-      setTimeout(() => {
-        let title = taskTitle;
-        let options = {
-          body: "It's time to start your task!",
-          icon: './bell.png',
-          timestamp:
-            new Date().toLocaleDateString(),
-        };
-        let notification = new Notification(
-          title,
-          options
-        );
+  return setTimeoutMilliseconds;
+}
 
-        // vibration api
-        navigator.vibrate =
-          navigator.vibrate ||
-          navigator.webkitVibrate ||
-          navigator.mozVibrate ||
-          navigator.msVibrate;
+function createSetTimeoutForNotification(
+  taskTitle
+) {
+  setTimeout(() => {
+    let title = taskTitle;
+    let options = {
+      body: "It's time to start your task!",
+      icon: './bell.png',
+      timestamp: new Date().toLocaleDateString(),
+    };
+    let notification = new Notification(
+      title,
+      options
+    );
 
-        if (navigator.vibrate) {
-          navigator.vibrate([
-            50, 100, 50, 100, 50, 100, 400, 100,
-            300, 100, 350, 50, 200, 100, 100, 50,
-            600,
-          ]);
-        }
-      }, setTimeoutMilliseconds);
+    // vibration api
+    navigator.vibrate =
+      navigator.vibrate ||
+      navigator.webkitVibrate ||
+      navigator.mozVibrate ||
+      navigator.msVibrate;
+
+    if (navigator.vibrate) {
+      navigator.vibrate([
+        50, 100, 50, 100, 50, 100, 400, 100, 300,
+        100, 350, 50, 200, 100, 100, 50, 600,
+      ]);
     }
-  }
+  }, setTimeoutMilliseconds);
 }
 
 // ************** DB SECTION *****************
@@ -173,6 +188,8 @@ function buildList() {
         appendTaskToList(task);
         setNotification(task);
       });
+    } else {
+      buildNoTaskLi();
     }
   };
 }
@@ -200,46 +217,55 @@ function readTasksFromDatabase() {
   return getAllTasksRequest;
 }
 
+const daysOfTheWeek = [
+  'Sun',
+  'Mon',
+  'Tues',
+  'Wed',
+  'Thur',
+  'Fri',
+  'Sat',
+];
+
 function appendTaskToList(task) {
-  let li = `<li><span class="task-title">${
+  let date = new Date(task.taskDate);
+
+  let li = `<li data-taskid=${
+    task.id
+  }><span class="task-title">${
     task.taskTitle
   }</span> <span class="right-arrow-span"><img src="arrows.png" alt="right arrow" class="arrow-icon" /></span> <span class="task-time">${
     task.taskTime
-  },</span> <span class="task-date">${new Date(
-    formatDate(task.taskDate)
-  ).toLocaleDateString()}</span> <span class="task-/li>`;
+  } <span class="am-pm">${
+    task.amOrPM
+  }</span>,</span> <span class="task-date">${
+    daysOfTheWeek[date.getDay()]
+  } ${date.toLocaleDateString()}</span> <span class="delete-span"><img src="cross.png" alt="cross sign" class="delete-task-icon" /></span></li>`;
 
   tasksUl.insertAdjacentHTML('afterbegin', li);
+
+  document
+    .querySelector('.delete-span')
+    .addEventListener(
+      'click',
+      deleteTaskFromDatabase
+    );
 }
 
-function formatDate(dateString) {
-  let [year, month, day] = dateString.split('-');
-  let formattedDate = [month, day, year].join(
-    '-'
-  );
-
-  return formattedDate;
-}
-
-taskForm.addEventListener('submit', (event) => {
-  event.preventDefault();
-
-  let [taskTitle, taskTime, taskDate] =
-    document.querySelectorAll('input');
-  taskTitle = taskTitle.value.trim();
-  taskTime = taskTime.value;
-  taskDate = taskDate.value;
-
-  let task = {
-    taskTitle,
-    taskTime,
-    taskDate,
-  };
-
-  getPermission();
-
-  addTaskToDatabase(task);
-});
+let monthsMap = new Map([
+  ['January', '01'],
+  ['February', '02'],
+  ['March', '03'],
+  ['April', '04'],
+  ['May', '05'],
+  ['June', '06'],
+  ['July', '07'],
+  ['August', '08'],
+  ['September', '09'],
+  ['October', '10'],
+  ['November', '11'],
+  ['December', '12'],
+]);
 
 function makeNewTransaction(storeName, mode) {
   let transaction = db.transaction(
@@ -282,8 +308,132 @@ function addTaskToDatabase(task) {
   };
 }
 
+function deleteTaskFromDatabase(event) {
+  const li = event.target.closest('li');
+
+  const taskId = Number(li.dataset.taskid);
+
+  let transaction = makeNewTransaction(
+    'magicalTasksStore',
+    'readwrite'
+  );
+
+  let store = transaction.objectStore(
+    'magicalTasksStore'
+  );
+
+  let request = store.delete(taskId);
+
+  request.onsuccess = () => {
+    createLog('Successfully deleted task');
+    li.remove();
+    buildList();
+  };
+
+  request.onerror = () => {
+    createLog('Error deleting task');
+  };
+}
+
+// ************** EVENT HANDLERS SECTION *****************
+
+taskForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+
+  let taskTitle = document
+    .querySelector('.task-title-input')
+    .value.trim();
+  let hours = document
+    .querySelector('.task-hours')
+    .value.padStart(2, '0');
+  let minutes = document
+    .querySelector('.task-minutes')
+    .value.padStart(2, '0');
+  let day = document.querySelector(
+    '.select-day'
+  ).value;
+  let month = document.querySelector(
+    '.select-month'
+  ).value;
+  let year = document.querySelector(
+    '.select-year'
+  ).value;
+
+  let amOrPM =
+    document.querySelector('.am-pm').value;
+
+  let taskDate = `${monthsMap.get(
+    month
+  )}-${day}-${year}`;
+
+  let taskTime = `${hours}:${minutes}`;
+
+  let task = {
+    taskTitle,
+    taskTime,
+    taskDate,
+    amOrPM,
+  };
+
+  getPermission();
+
+  addTaskToDatabase(task);
+});
+
+btnClear.addEventListener('click', function (e) {
+  let transaction = makeNewTransaction(
+    'magicalTasksStore',
+    'readwrite'
+  );
+
+  transaction.oncomplete = () => {
+    createLog('All tasks cleared');
+  };
+
+  let store = transaction.objectStore(
+    'magicalTasksStore'
+  );
+
+  store.clear();
+
+  transaction.onerror = () => {
+    createLog('Error clearing all tasks');
+  };
+
+  cleanUpUI();
+});
+
+// ************** UTILITY FUNCTIONS SECTION *****************
+
 function clearFormInput() {
   taskForm.reset();
 }
 
+function cleanUpUI() {
+  tasksUl.innerHTML = '';
+
+  buildNoTaskLi();
+
+  displayTasksDiv.classList.remove('active');
+}
+
+function buildNoTaskLi() {
+  let li = document.createElement('li');
+  li.textContent = 'You have no tasks';
+
+  let span = document.createElement('span');
+  span.classList.add('confetti-icon');
+
+  let img = document.createElement('img');
+  img.setAttribute('src', 'confetti.png');
+  img.setAttribute('alt', 'confetti');
+
+  span.appendChild(img);
+
+  li.appendChild(span);
+
+  tasksUl.appendChild(li);
+}
+
+// ************** Startup DB *****************
 IDB();
