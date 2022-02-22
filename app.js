@@ -59,7 +59,10 @@ function setNotification(task) {
 
     // set notification for future tasks and not past tasks
     if (setTimeoutMilliseconds >= 0) {
-      createSetTimeoutForNotification(taskTitle);
+      createSetTimeoutForNotification(
+        taskTitle,
+        setTimeoutMilliseconds
+      );
     }
   }
 }
@@ -104,7 +107,8 @@ function calculateMilliseconds(taskTime) {
 }
 
 function createSetTimeoutForNotification(
-  taskTitle
+  taskTitle,
+  setTimeoutMilliseconds
 ) {
   setTimeout(() => {
     let title = taskTitle;
@@ -361,6 +365,10 @@ taskForm.addEventListener('submit', (event) => {
 
   let amOrPM =
     document.querySelector('.am-pm').value;
+
+  if (!amOrPM) {
+    amOrPM = 'AM';
+  }
 
   let taskDate = `${monthsMap.get(
     month
