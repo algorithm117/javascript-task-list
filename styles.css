@@ -314,6 +314,10 @@ input.task-minutes {
   transition: all 0.7s;
 }
 
+.btn:hover {
+  background-position: right center;
+}
+
 .btn-clear {
   font-size: 0.8rem;
   word-break: break-word;
@@ -370,10 +374,6 @@ input.task-minutes {
 .btn-clear:hover::before {
   transform: rotateY(100deg);
   opacity: 0.6;
-}
-
-.btn:hover {
-  background-position: right center;
 }
 
 .btn:active,

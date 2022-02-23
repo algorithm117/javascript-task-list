@@ -55,7 +55,7 @@ function setNotification(task) {
   // create notification only on day task is due
   if (sameDay) {
     const setTimeoutMilliseconds =
-      calculateMilliseconds(taskTime);
+      calculateMilliseconds(taskDate, taskTime);
 
     // set notification for future tasks and not past tasks
     if (setTimeoutMilliseconds >= 0) {
@@ -86,18 +86,34 @@ function checkForSameDay(taskDate) {
   return utc1 - utc2 === 0;
 }
 
-function calculateMilliseconds(taskTime) {
+function calculateMilliseconds(
+  taskDate,
+  taskTime
+) {
+  const numberOfMillisecondsInOneMinute =
+    60 * 1000;
+  const numberOfMillisecondsInOneHour =
+    60 * 60 * 1000;
+
+  let dateStr = `${taskDate.replaceAll(
+    '/',
+    '-'
+  )}T${taskTime}:00`;
+  const dateForTask = new Date(dateStr);
   const taskDateMilliseconds =
-    Number(taskTime.split(':')[0]) *
-      60 *
-      60 *
-      1000 +
-    Number(taskTime.split(':')[1]) * 60 * 1000;
+    dateForTask.getHours() *
+      numberOfMillisecondsInOneHour +
+    dateForTask.getMinutes() *
+      numberOfMillisecondsInOneMinute;
 
   const dateNow = new Date();
+
+  // Need to mod by 12 since user input for hours in HTML form is restricted to values between 0 - 12
   const currentTimeMilliseconds =
-    dateNow.getHours() * 60 * 60 * 1000 +
-    dateNow.getMinutes() * 60 * 1000;
+    (dateNow.getHours() % 12) *
+      numberOfMillisecondsInOneHour +
+    dateNow.getMinutes() *
+      numberOfMillisecondsInOneMinute;
 
   const setTimeoutMilliseconds =
     taskDateMilliseconds -
