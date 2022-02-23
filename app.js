@@ -364,11 +364,7 @@ taskForm.addEventListener('submit', (event) => {
   ).value;
 
   let amOrPM =
-    document.querySelector('.am-pm').value;
-
-  if (!amOrPM) {
-    amOrPM = 'AM';
-  }
+    document.querySelector('#am-pm').value;
 
   let taskDate = `${year}/${monthsMap.get(
     month
