@@ -1,4 +1,4 @@
-// ************** SELECTORS SECTION *****************
+// ************** GLOBAL VARIABLES/SELECTORS SECTION *****************
 
 const displayTasksDiv = document.querySelector(
   '.display-tasks'
@@ -256,21 +256,6 @@ function appendTaskToList(task) {
     );
 }
 
-let monthsMap = new Map([
-  ['January', '01'],
-  ['February', '02'],
-  ['March', '03'],
-  ['April', '04'],
-  ['May', '05'],
-  ['June', '06'],
-  ['July', '07'],
-  ['August', '08'],
-  ['September', '09'],
-  ['October', '10'],
-  ['November', '11'],
-  ['December', '12'],
-]);
-
 function makeNewTransaction(storeName, mode) {
   let transaction = db.transaction(
     storeName,
@@ -341,6 +326,21 @@ function deleteTaskFromDatabase(event) {
 
 // ************** EVENT HANDLERS SECTION *****************
 
+let monthsMap = new Map([
+  ['January', '01'],
+  ['February', '02'],
+  ['March', '03'],
+  ['April', '04'],
+  ['May', '05'],
+  ['June', '06'],
+  ['July', '07'],
+  ['August', '08'],
+  ['September', '09'],
+  ['October', '10'],
+  ['November', '11'],
+  ['December', '12'],
+]);
+
 taskForm.addEventListener('submit', (event) => {
   event.preventDefault();
 
@@ -370,9 +370,9 @@ taskForm.addEventListener('submit', (event) => {
     amOrPM = 'AM';
   }
 
-  let taskDate = `${monthsMap.get(
+  let taskDate = `${year}/${monthsMap.get(
     month
-  )}-${day}-${year}`;
+  )}/${day}`;
 
   let taskTime = `${hours}:${minutes}`;
 
