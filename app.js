@@ -57,8 +57,6 @@ function setNotification(task) {
     const setTimeoutMilliseconds =
       calculateMilliseconds(taskDate, taskTime);
 
-    console.log(setTimeoutMilliseconds);
-
     // set notification for future tasks and not past tasks
     if (setTimeoutMilliseconds >= 0) {
       createSetTimeoutForNotification(
