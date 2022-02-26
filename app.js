@@ -455,5 +455,64 @@ function buildNoTaskLi() {
   tasksUl.appendChild(li);
 }
 
+// ************** SET DATE INPUTS ON FORM *****************
+{
+  const selectDay = document.querySelector(
+    '.select-day'
+  );
+  const selectMonth = document.querySelector(
+    '.select-month'
+  );
+  const selectYear = document.querySelector(
+    '.select-year'
+  );
+
+  const currentDate = new Date();
+
+  const day = currentDate.getDate();
+  setSelectedAttribute(selectDay, day);
+
+  // add one since months are zero-indexed based.
+  const month = currentDate.getMonth() + 1;
+  findAndSetMonthSelectedAttribute(
+    selectMonth,
+    month
+  );
+
+  const year = currentDate.getFullYear();
+  setSelectedAttribute(selectYear, year);
+}
+
+function setSelectedAttribute(
+  selectElement,
+  inputValue
+) {
+  for (const option of selectElement.options) {
+    if (inputValue == option.value) {
+      option.setAttribute('selected', 'selected');
+      break;
+    }
+  }
+}
+
+function findAndSetMonthSelectedAttribute(
+  selectMonth,
+  month
+) {
+  let monthName = 'January';
+  for (const [
+    currentMonthName,
+    currentMonthIndex,
+  ] of monthsMap.entries()) {
+    if (month == currentMonthIndex) {
+      console.log(currentMonthName);
+      monthName = currentMonthName;
+      break;
+    }
+  }
+
+  setSelectedAttribute(selectMonth, monthName);
+}
+
 // ************** Startup DB *****************
 IDB();
