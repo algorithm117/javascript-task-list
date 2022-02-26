@@ -8,21 +8,21 @@ tsParticles.load('tsparticles', {
   },
   particles: {
     number: {
-      value: 50,
+      value: 30,
       density: {
         enable: true,
         value_area: 500,
       },
     },
     color: {
-      value: '#fff',
+      value: '#FDFCFE',
     },
     shape: {
-      type: 'circle',
+      type: 'star',
     },
     opacity: {
-      value: 0.3,
-      random: true,
+      value: 0.4,
+      random: false,
       anim: {
         enable: true,
         speed: 0.1,
@@ -31,7 +31,7 @@ tsParticles.load('tsparticles', {
       },
     },
     size: {
-      value: 5,
+      value: 4,
       random: true,
       anim: {
         enable: true,
@@ -49,7 +49,7 @@ tsParticles.load('tsparticles', {
     },
     move: {
       enable: true,
-      speed: 1.3,
+      speed: 1.2,
       direction: 'bottom-left',
       random: false,
       straight: false,
@@ -64,14 +64,14 @@ tsParticles.load('tsparticles', {
   interactivity: {
     events: {
       onhover: {
-        enable: true,
+        enable: false,
         mode: 'bubble',
       },
       onclick: {
         enable: false,
         mode: 'repulse',
       },
-      resize: true,
+      resize: false,
     },
     modes: {
       grab: {

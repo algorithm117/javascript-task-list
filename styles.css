@@ -171,6 +171,7 @@ span.confetti-icon {
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 1rem 2rem;
   font-size: 2rem;
   margin-bottom: 1rem;
   color: #79018c;
@@ -218,8 +219,8 @@ input.task-minutes {
   align-items: center;
   justify-content: center;
   margin-left: 2rem;
-  height: 3rem;
-  width: 3rem;
+  height: 3.4rem;
+  width: 3.4rem;
   background-color: #6e3cbc;
   border-radius: 50%;
   cursor: pointer;
@@ -228,17 +229,17 @@ input.task-minutes {
 }
 
 .delete-task-icon {
-  width: 2.4rem;
-  height: 2.4rem;
+  width: 2.6rem;
+  height: 2.6rem;
   transition: all 0.8s;
 }
 
-.delete-span:hover {
+/* .delete-span:hover {
   transform: scale(1.05);
-}
+} */
 
 .delete-task-icon:hover {
-  transform: rotate(350deg);
+  transform: rotate(350deg) scale(1.05);
 }
 
 .task-form-container {
