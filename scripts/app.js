@@ -130,7 +130,7 @@ function createSetTimeoutForNotification(
     let title = taskTitle;
     let options = {
       body: "It's time to start your task!",
-      icon: './bell.png',
+      icon: '../images/bell.png',
       timestamp: new Date().toLocaleDateString(),
     };
     let notification = new Notification(
@@ -254,13 +254,13 @@ function appendTaskToList(task) {
     task.id
   }><span class="task-title">${
     task.taskTitle
-  }</span> <span class="right-arrow-span"><img src="arrows.png" alt="right arrow" class="arrow-icon" /></span> <span class="task-time">${
+  }</span> <span class="right-arrow-span"><img src="../images/arrows.png" alt="right arrow" class="arrow-icon" /></span> <span class="task-time">${
     task.taskTime
   } <span class="am-pm">${
     task.amOrPM
   }</span>,</span> <span class="task-date">${
     daysOfTheWeek[date.getDay()]
-  } ${date.toLocaleDateString()}</span> <span class="delete-span"><img src="cross.png" alt="cross sign" class="delete-task-icon" /></span></li>`;
+  } ${date.toLocaleDateString()}</span> <span class="delete-span"><img src="../images/cross.png" alt="cross sign" class="delete-task-icon" /></span></li>`;
 
   tasksUl.insertAdjacentHTML('afterbegin', li);
 
@@ -445,7 +445,10 @@ function buildNoTaskLi() {
   span.classList.add('confetti-icon');
 
   let img = document.createElement('img');
-  img.setAttribute('src', 'confetti.png');
+  img.setAttribute(
+    'src',
+    '../images/confetti.png'
+  );
   img.setAttribute('alt', 'confetti');
 
   span.appendChild(img);
