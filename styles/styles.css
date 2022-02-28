@@ -12,8 +12,8 @@ body {
   font-family: 'Cinzel Decorative', sans-serif;
   background-color: #6867ac;
   height: 100vh;
-  background: url('magical.jpg') no-repeat center
-    center fixed;
+  background: url('../images/magical.jpg')
+    no-repeat center center fixed;
   background-size: cover;
   position: relative;
   overflow: hidden;
@@ -142,7 +142,7 @@ body::before {
 .magical-wand-icon {
   width: 2rem;
   height: 2rem;
-  margin-left: 0.8rem;
+  margin-left: 1rem;
 }
 
 .display-tasks,
