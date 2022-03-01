@@ -439,19 +439,30 @@ function cleanUpUI() {
 
 function buildNoTaskLi() {
   let li = document.createElement('li');
-  li.textContent = 'You have no tasks';
+  li.textContent = 'You have no tasks!';
 
   let span = document.createElement('span');
   span.classList.add('confetti-icon');
 
-  let img = document.createElement('img');
-  img.setAttribute(
-    'src',
-    '../images/confetti.png'
-  );
-  img.setAttribute('alt', 'confetti');
+  // let img = document.createElement('img');
+  // img.setAttribute(
+  //   'src',
+  //   '../images/confetti.png'
+  // );
+  // img.setAttribute('alt', 'confetti');
 
-  span.appendChild(img);
+  const danceAnimation = lottie.loadAnimation({
+    container: span,
+    path: 'https://assets2.lottiefiles.com/packages/lf20_6dvhclex.json',
+    renderer: 'svg',
+    loop: true,
+    autoplay: true,
+    name: 'Confetti Animation',
+  });
+
+  danceAnimation.setSpeed(0.8);
+
+  // span.appendChild(img);
 
   li.appendChild(span);
 
@@ -508,7 +519,6 @@ function findAndSetMonthSelectedAttribute(
     currentMonthIndex,
   ] of monthsMap.entries()) {
     if (month == currentMonthIndex) {
-      console.log(currentMonthName);
       monthName = currentMonthName;
       break;
     }

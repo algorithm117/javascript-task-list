@@ -162,6 +162,11 @@ span.confetti-icon {
   margin-left: 0.8rem;
 }
 
+span.confetti-icon svg {
+  width: 10rem !important;
+  height: 10rem !important;
+}
+
 .tasks {
   list-style-type: none;
   margin-top: 1rem;
@@ -171,7 +176,7 @@ span.confetti-icon {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 1rem 2rem;
+  /* padding: 1rem 2rem; */
   font-size: 2rem;
   margin-bottom: 1rem;
   color: #79018c;
