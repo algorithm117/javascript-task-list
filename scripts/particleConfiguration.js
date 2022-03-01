@@ -8,7 +8,7 @@ tsParticles.load('tsparticles', {
   },
   particles: {
     number: {
-      value: 30,
+      value: 35,
       density: {
         enable: true,
         value_area: 500,
@@ -18,7 +18,7 @@ tsParticles.load('tsparticles', {
       value: '#FDFCFE',
     },
     shape: {
-      type: 'star',
+      type: 'circle',
     },
     opacity: {
       value: 0.4,
