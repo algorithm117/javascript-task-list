@@ -48,21 +48,30 @@ function getPermission() {
 }
 
 function setNotification(task) {
-  let { taskTitle, taskTime, taskDate } = task;
+  let { taskTitle, taskTime, taskDate, amOrPM } =
+    task;
 
   const sameDay = checkForSameDay(taskDate);
 
-  // create notification only on day task is due
+  // only create notification day of task.
   if (sameDay) {
-    const setTimeoutMilliseconds =
-      calculateMilliseconds(taskDate, taskTime);
+    // set notification if there was not one previously set.
+    if (!task.notificationIsSet) {
+      const setTimeoutMilliseconds =
+        calculateMilliseconds(
+          taskDate,
+          taskTime,
+          amOrPM
+        );
 
-    // set notification for future tasks and not past tasks
-    if (setTimeoutMilliseconds >= 0) {
-      createSetTimeoutForNotification(
-        taskTitle,
-        setTimeoutMilliseconds
-      );
+      // set notification for future tasks and not past tasks
+      if (setTimeoutMilliseconds >= 0) {
+        updateTaskNotificationSetProperty(task);
+        createSetTimeoutForNotification(
+          taskTitle,
+          setTimeoutMilliseconds
+        );
+      }
     }
   }
 }
@@ -86,9 +95,15 @@ function checkForSameDay(taskDate) {
   return utc1 - utc2 === 0;
 }
 
+function updateTaskNotificationSetProperty(task) {
+  task.notificationIsSet = true;
+  updateTaskInDatabase(task);
+}
+
 function calculateMilliseconds(
   taskDate,
-  taskTime
+  taskTime,
+  amOrPM
 ) {
   const numberOfMillisecondsInOneMinute =
     60 * 1000;
@@ -100,7 +115,8 @@ function calculateMilliseconds(
     '-'
   )}T${taskTime}:00`;
   const dateForTask = new Date(dateStr);
-  const taskDateMilliseconds =
+
+  let taskDateMilliseconds =
     (dateForTask.getHours() % 12) *
       numberOfMillisecondsInOneHour +
     dateForTask.getMinutes() *
@@ -114,6 +130,19 @@ function calculateMilliseconds(
       numberOfMillisecondsInOneHour +
     dateNow.getMinutes() *
       numberOfMillisecondsInOneMinute;
+
+  // depending on whether the task time was AM or PM we need to adjust taskDateMilliseconds variable. This is to ensure the difference between a task that is scheduled for 2am does not trigger a notification for a task that is set for 2pm on the same day as we are working with 12 hour system versus 24 hours system in this app. So, if the amOrPM property on the task is PM, we will add 12 hours worth of milliseconds to taskDateMilliseconds
+
+  if (
+    dateForTask.getHours() <= 11 &&
+    amOrPM === 'PM'
+  ) {
+    const calculate12HoursWorthOfMilliseconds =
+      12 * numberOfMillisecondsInOneHour;
+    taskDateMilliseconds =
+      taskDateMilliseconds +
+      calculate12HoursWorthOfMilliseconds;
+  }
 
   const setTimeoutMilliseconds =
     taskDateMilliseconds -
@@ -130,27 +159,13 @@ function createSetTimeoutForNotification(
     let title = taskTitle;
     let options = {
       body: "It's time to start your task!",
-      icon: '../images/bell.png',
+      icon: 'images/bell.png',
       timestamp: new Date().toLocaleDateString(),
     };
     let notification = new Notification(
       title,
       options
     );
-
-    // vibration api
-    navigator.vibrate =
-      navigator.vibrate ||
-      navigator.webkitVibrate ||
-      navigator.mozVibrate ||
-      navigator.msVibrate;
-
-    if (navigator.vibrate) {
-      navigator.vibrate([
-        50, 100, 50, 100, 50, 100, 400, 100, 300,
-        100, 350, 50, 200, 100, 100, 50, 600,
-      ]);
-    }
   }, setTimeoutMilliseconds);
 }
 
@@ -220,15 +235,15 @@ function readTasksFromDatabase() {
     'readonly'
   );
 
-  transaction.oncomplete = () => {
-    createLog('All tasks successfully loaded');
-  };
-
   let store = transaction.objectStore(
     'magicalTasksStore'
   );
 
   let getAllTasksRequest = store.getAll();
+
+  transaction.oncomplete = () => {
+    createLog('All tasks successfully loaded');
+  };
 
   getAllTasksRequest.onerror = () => {
     createLog('Error retrieving all tasks');
@@ -254,13 +269,13 @@ function appendTaskToList(task) {
     task.id
   }><span class="task-title">${
     task.taskTitle
-  }</span> <span class="right-arrow-span"><img src="../images/arrows.png" alt="right arrow" class="arrow-icon" /></span> <span class="task-time">${
+  }</span> <span class="right-arrow-span"><img src="images/arrows.png" alt="right arrow" class="arrow-icon" /></span> <span class="task-time">${
     task.taskTime
   } <span class="am-pm">${
     task.amOrPM
   }</span>,</span> <span class="task-date">${
     daysOfTheWeek[date.getDay()]
-  } ${date.toLocaleDateString()}</span> <span class="delete-span"><img src="../images/cross.png" alt="cross sign" class="delete-task-icon" /></span></li>`;
+  } ${date.toLocaleDateString()}</span> <span class="delete-span"><img src="images/cross.png" alt="cross sign" class="delete-task-icon" /></span></li>`;
 
   tasksUl.insertAdjacentHTML('afterbegin', li);
 
@@ -310,6 +325,27 @@ function addTaskToDatabase(task) {
     appendTaskToList(task);
     clearFormInput();
     buildList();
+  };
+}
+
+function updateTaskInDatabase(task) {
+  let transaction = makeNewTransaction(
+    'magicalTasksStore',
+    'readwrite'
+  );
+
+  let store = transaction.objectStore(
+    'magicalTasksStore'
+  );
+
+  let request = store.put(task);
+
+  request.onsuccess = () => {
+    createLog('Successfully updated task');
+  };
+
+  request.onerror = () => {
+    createLog('Error updating task');
   };
 }
 
@@ -393,6 +429,7 @@ taskForm.addEventListener('submit', (event) => {
     taskTime,
     taskDate,
     amOrPM,
+    notificationIsSet: false,
   };
 
   getPermission();
@@ -444,13 +481,6 @@ function buildNoTaskLi() {
   let span = document.createElement('span');
   span.classList.add('confetti-icon');
 
-  // let img = document.createElement('img');
-  // img.setAttribute(
-  //   'src',
-  //   '../images/confetti.png'
-  // );
-  // img.setAttribute('alt', 'confetti');
-
   const danceAnimation = lottie.loadAnimation({
     container: span,
     path: 'https://assets2.lottiefiles.com/packages/lf20_6dvhclex.json',
@@ -461,8 +491,6 @@ function buildNoTaskLi() {
   });
 
   danceAnimation.setSpeed(0.8);
-
-  // span.appendChild(img);
 
   li.appendChild(span);
 

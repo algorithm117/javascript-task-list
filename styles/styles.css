@@ -135,14 +135,22 @@ body::before {
 
 .adding-task-title {
   display: flex;
+  align-items: center;
   justify-content: center;
+  color: #7dedff;
   margin: 1.5rem 0 2rem 0;
 }
 
-.magical-wand-icon {
-  width: 2rem;
-  height: 2rem;
-  margin-left: 1rem;
+.calendar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar-icon img {
+  width: 5rem;
+  height: 5rem;
+  margin-left: 0.5rem;
 }
 
 .display-tasks,
@@ -340,9 +348,9 @@ input.task-minutes {
   cursor: pointer;
   background-image: linear-gradient(
     to right,
-    #b762c1 0%,
-    #ea99d5 51%,
-    #b762c1 100%
+    #94b3fd 0%,
+    #b983ff 51%,
+    #a2d2ff 100%
   );
   background-size: 200% auto;
   transition: all 0.7s;
@@ -368,9 +376,9 @@ input.task-minutes {
   left: 0;
   background-image: linear-gradient(
     to right,
-    #d77fa1 0%,
-    #baabda 51%,
-    #d77fa1 100%
+    #7267cb 0%,
+    #98bae7 51%,
+    #9ad0ec 100%
   );
   background-size: 200% auto;
   transform-origin: left center;
