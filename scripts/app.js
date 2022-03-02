@@ -1,3 +1,5 @@
+// since the notificationIsSet property is set once and persisted by the database, if you currently close your application, the setTimeout function will not register again for the notification, however the notificationIsSet property will still be true in the database. Just be aware of this behavior while testing.
+
 // ************** GLOBAL VARIABLES/SELECTORS SECTION *****************
 
 const displayTasksDiv = document.querySelector(
@@ -110,39 +112,26 @@ function calculateMilliseconds(
   const numberOfMillisecondsInOneHour =
     60 * 60 * 1000;
 
-  let dateStr = `${taskDate.replaceAll(
-    '/',
-    '-'
-  )}T${taskTime}:00`;
-  const dateForTask = new Date(dateStr);
+  const dateNow = new Date();
+
+  const dateForTask = createDateFromDateAndTime(
+    taskDate,
+    taskTime
+  );
+
+  let hours = setHours(dateForTask, amOrPM);
 
   let taskDateMilliseconds =
-    (dateForTask.getHours() % 12) *
-      numberOfMillisecondsInOneHour +
+    hours * numberOfMillisecondsInOneHour +
     dateForTask.getMinutes() *
       numberOfMillisecondsInOneMinute;
 
-  const dateNow = new Date();
-
   // Need to mod by 12 since user input for hours in HTML form is restricted to values between 0 - 12
   const currentTimeMilliseconds =
-    (dateNow.getHours() % 12) *
+    dateNow.getHours() *
       numberOfMillisecondsInOneHour +
     dateNow.getMinutes() *
       numberOfMillisecondsInOneMinute;
-
-  // depending on whether the task time was AM or PM we need to adjust taskDateMilliseconds variable. This is to ensure the difference between a task that is scheduled for 2am does not trigger a notification for a task that is set for 2pm on the same day as we are working with 12 hour system versus 24 hours system in this app. So, if the amOrPM property on the task is PM, we will add 12 hours worth of milliseconds to taskDateMilliseconds
-
-  if (
-    dateForTask.getHours() <= 11 &&
-    amOrPM === 'PM'
-  ) {
-    const calculate12HoursWorthOfMilliseconds =
-      12 * numberOfMillisecondsInOneHour;
-    taskDateMilliseconds =
-      taskDateMilliseconds +
-      calculate12HoursWorthOfMilliseconds;
-  }
 
   const setTimeoutMilliseconds =
     taskDateMilliseconds -
@@ -263,6 +252,18 @@ const daysOfTheWeek = [
 ];
 
 function appendTaskToList(task) {
+  const expiredTaskDate =
+    checkForExpiredTaskDateAndTime(
+      task.taskDate,
+      task.taskTime,
+      task.amOrPM
+    );
+
+  // do not append task to list if it has expired.
+  if (expiredTaskDate) {
+    return;
+  }
+
   let date = new Date(task.taskDate);
 
   let li = `<li data-taskid=${
@@ -424,6 +425,21 @@ taskForm.addEventListener('submit', (event) => {
 
   let taskTime = `${hours}:${minutes}`;
 
+  const expiredTaskDate =
+    checkForExpiredTaskDateAndTime(
+      taskDate,
+      taskTime,
+      amOrPM
+    );
+
+  if (expiredTaskDate) {
+    clearFormInput();
+    createLog(
+      'Error! Please enter future date/time for task.'
+    );
+    return;
+  }
+
   let task = {
     taskTitle,
     taskTime,
@@ -495,6 +511,71 @@ function buildNoTaskLi() {
   li.appendChild(span);
 
   tasksUl.appendChild(li);
+}
+
+function createDateFromDateAndTime(date, time) {
+  let dateStr = `${date.replaceAll(
+    '/',
+    '-'
+  )}T${time}:00`;
+  const dateForTask = new Date(dateStr);
+
+  return dateForTask;
+}
+
+function checkForExpiredTaskDateAndTime(
+  date,
+  time,
+  amOrPM
+) {
+  let dateForTask = createDateFromDateAndTime(
+    date,
+    time
+  );
+
+  const currentDate = new Date();
+
+  let dateForTaskHours = setHours(
+    dateForTask,
+    amOrPM
+  );
+
+  if (
+    dateForTask.getFullYear() <
+    currentDate.getFullYear()
+  ) {
+    return true;
+  } else if (
+    dateForTask.getMonth() <
+    currentDate.getMonth()
+  ) {
+    return true;
+  } else if (
+    dateForTask.getDate() < currentDate.getDate()
+  ) {
+    return true;
+  } else if (
+    dateForTaskHours < currentDate.getHours()
+  ) {
+    return true;
+  }
+
+  return (
+    dateForTask.getMinutes() <
+    currentDate.getMinutes()
+  );
+}
+
+function setHours(date, amOrPM) {
+  let hours = date.getHours();
+
+  if (amOrPM === 'PM') {
+    hours = hours + 12;
+  } else if (date.getHours() > 11) {
+    hours = hours - 12;
+  }
+
+  return hours;
 }
 
 // ************** SET DATE INPUTS ON FORM *****************
