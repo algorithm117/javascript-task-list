@@ -71,7 +71,8 @@ function setNotification(task) {
         updateTaskNotificationSetProperty(task);
         createSetTimeoutForNotification(
           taskTitle,
-          setTimeoutMilliseconds
+          setTimeoutMilliseconds,
+          task
         );
       }
     }
@@ -142,7 +143,8 @@ function calculateMilliseconds(
 
 function createSetTimeoutForNotification(
   taskTitle,
-  setTimeoutMilliseconds
+  setTimeoutMilliseconds,
+  task
 ) {
   setTimeout(() => {
     let title = taskTitle;
@@ -155,6 +157,12 @@ function createSetTimeoutForNotification(
       title,
       options
     );
+
+    notification.onclose = () => {
+      setTimeout(() => {
+        deleteExpiredTasksFromDatabase(task);
+      }, 3000);
+    };
   }, setTimeoutMilliseconds);
 }
 
@@ -259,8 +267,9 @@ function appendTaskToList(task) {
       task.amOrPM
     );
 
-  // do not append task to list if it has expired.
+  // do not append task to list if it has expired & delete from database.
   if (expiredTaskDate) {
+    deleteExpiredTasksFromDatabase(task);
     return;
   }
 
@@ -347,6 +356,30 @@ function updateTaskInDatabase(task) {
 
   request.onerror = () => {
     createLog('Error updating task');
+  };
+}
+
+function deleteExpiredTasksFromDatabase(task) {
+  const taskId = task.id;
+
+  let transaction = makeNewTransaction(
+    'magicalTasksStore',
+    'readwrite'
+  );
+
+  let store = transaction.objectStore(
+    'magicalTasksStore'
+  );
+
+  let request = store.delete(taskId);
+
+  request.onsuccess = () => {
+    createLog('Successfully deleted task');
+    buildList();
+  };
+
+  request.onerror = () => {
+    createLog('Error deleting task');
   };
 }
 
@@ -491,6 +524,9 @@ function cleanUpUI() {
 }
 
 function buildNoTaskLi() {
+  // clear out everything to make every task is cleared from the list.
+  tasksUl.innerHTML = '';
+
   let li = document.createElement('li');
   li.textContent = 'You have no tasks!';
 
