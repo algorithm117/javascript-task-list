@@ -223,14 +223,56 @@
           </form>
         </section>
 
-        <section id="logging-db-status">
-          <div class="logging-container">
-            <ul class="logs"></ul>
+        <div class="log-music-container">
+          <section id="logging-db-status">
+            <div class="logging-container">
+              <ul class="logs"></ul>
+            </div>
+          </section>
+          <div id="music-player">
+            <div class="playing-time">
+              <audio
+                src="sonny.mp3"
+                preload="metadata"
+                loop
+              ></audio>
+              <button id="play-icon"></button>
+              <span id="current-time" class="time"
+                >0:00</span
+              >
+              <input
+                type="range"
+                id="seek-slider"
+                max="100"
+                value="0"
+              />
+              <span id="duration" class="time"
+                >0:00</span
+              >
+            </div>
+            <div class="volume">
+              <output id="volume-output"
+                >50</output
+              >
+              <input
+                type="range"
+                id="volume-slider"
+                max="100"
+                value="50"
+              />
+              <button id="mute-icon"></button>
+            </div>
           </div>
-        </section>
+        </div>
       </div>
     </div>
 
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.8.1/lottie.min.js"
+      integrity="sha512-V1YyTKZJrzJNhcKthpNAaohFXBnu5K9j7Qiz6gv1knFuf13TW/3vpgVVhJu9fvbdW8lb5J6czIhD4fWK2iHKXA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
     <script src="https://cdn.jsdelivr.net/npm/tsparticles@1/tsparticles.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tsparticles-preset-snow@1/tsparticles.preset.snow.min.js"></script>
     <script src="particleConfiguration.js"></script>

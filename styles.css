@@ -384,13 +384,21 @@ input.task-minutes {
 
 /* End of Task Form Styles */
 
+.log-music-container {
+  width: 90%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 /* Logging Section */
 
 .logs {
   background-color: #fbcaff;
-  width: 30%;
+  width: 110%;
   height: 120px;
-  margin: 2rem 5%;
+  margin: 2rem 0 2rem 0;
   border-radius: 0.5rem;
   list-style-type: circle;
   padding: 0.5rem;
@@ -406,3 +414,115 @@ input.task-minutes {
 }
 
 /* End of Logging Section */
+
+/* MUSIC PLAYER STYLES */
+
+#music-player {
+  width: 50%;
+  height: 12rem;
+  background-color: #88fff7;
+  padding: 0.5rem 1.5rem;
+  --seek-before-width: 0%;
+  --volume-width: 50%;
+  --buffered-width: 0%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+#play-icon,
+#mute-icon {
+  background: none;
+  border: none;
+  width: 3.5rem;
+  height: 3.5rem;
+  cursor: pointer;
+}
+
+#play-icon svg path,
+#mute-icon svg path {
+  stroke: #7c83fd;
+}
+
+.time,
+#volume-output {
+  font-size: 1.6rem;
+}
+
+.playing-time,
+.volume {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 0.6rem;
+}
+
+input[type='range'] {
+  -webkit-appearance: none;
+  background: none;
+  position: relative;
+  width: 50%;
+  height: 2rem;
+  margin: 1rem 1rem;
+}
+
+input[type='range']::before {
+  position: absolute;
+  content: '';
+  top: 0.8rem;
+  left: 0;
+  height: 0.3rem;
+  background-color: red;
+  cursor: pointer;
+}
+
+#seek-slider::before {
+  width: var(--seek-before-width);
+}
+
+#volume-slider::before {
+  width: var(--volume-width);
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 3px;
+  cursor: pointer;
+}
+
+#seek-slider::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    to right,
+    rgba(0, 125, 181, 0.6) var(--buffered-width),
+    rgba(0, 125, 181, 0.2) var(--buffered-width)
+  );
+}
+
+#volume-slider::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    to right,
+    rgba(0, 125, 181, 0.6) 0%,
+    rgba(0, 125, 181, 0.2) 100%
+  );
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  position: relative;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 0.1rem solid #fff;
+  background-color: #ea99d5;
+  border-radius: 50%;
+  cursor: pointer;
+  margin: -0.65rem 0 0 0;
+}
+
+input[type='range']:active::-webkit-slider-thumb {
+  transform: scale(1.2);
+  background: #96baff;
+}
+
+/* END OF MUSIC PLAYER STYLES */

@@ -455,5 +455,176 @@ function buildNoTaskLi() {
   tasksUl.appendChild(li);
 }
 
+// ************** MUSCIC PLAYER *****************
+
+const musicPlayerContainer =
+  document.querySelector('#music-player');
+const playPauseIconContainer =
+  document.querySelector('#play-icon');
+const muteIconContainer =
+  document.querySelector('#mute-icon');
+const audio = document.querySelector('audio');
+const durationContainer =
+  document.querySelector('#duration');
+const currentTimeContainer =
+  document.querySelector('#current-time');
+const volumeContainer = document.querySelector(
+  '#volume-output'
+);
+const seekSlider = document.querySelector(
+  '#seek-slider'
+);
+const volumeSlider = document.querySelector(
+  '#volume-slider'
+);
+
+const playOrPauseAnimation = lottie.loadAnimation(
+  {
+    container: playPauseIconContainer,
+    path: 'https://maxst.icons8.com/vue-static/landings/animated-icons/icons/pause/pause.json',
+    renderer: 'svg',
+    loop: false,
+    autoplay: false,
+    name: 'Play/Pause Animation',
+  }
+);
+
+const muteAnimation = lottie.loadAnimation({
+  container: muteIconContainer,
+  path: 'https://maxst.icons8.com/vue-static/landings/animated-icons/icons/mute/mute.json',
+  renderer: 'svg',
+  loop: false,
+  autoplay: false,
+  name: 'Mute/Unmute Animation',
+});
+
+playOrPauseAnimation.goToAndStop(14, true);
+
+let playOrPauseState = 'play';
+let muteState = 'mute';
+
+playPauseIconContainer.addEventListener(
+  'click',
+  () => {
+    if (playOrPauseState === 'play') {
+      audio.play();
+      playOrPauseState = 'pause';
+      playOrPauseAnimation.playSegments(
+        [14, 27],
+        true
+      );
+    } else {
+      audio.pause();
+      playOrPauseState = 'play';
+      playOrPauseAnimation.playSegments(
+        [0, 14],
+        true
+      );
+    }
+  }
+);
+
+const displayDuration = () => {
+  // audio.duration returns a value in seconds.
+  durationContainer.textContent = calculateTime(
+    audio.duration
+  );
+};
+
+const setSliderMaxAttribute = () => {
+  seekSlider.setAttribute(
+    'max',
+    Math.floor(audio.duration)
+  );
+};
+
+const displayBufferedAmount = () => {
+  const bufferedAmount = audio.buffered.end(
+    audio.buffered.length - 1
+  );
+  musicPlayerContainer.style.setProperty(
+    '--buffered-width',
+    `${Math.floor(
+      (bufferedAmount / seekSlider.max) * 100
+    )}%`
+  );
+};
+
+const showRangeProgress = (event) => {
+  if (seekSlider === event.target) {
+    const currentDuration = calculateTime(
+      seekSlider.value
+    );
+    currentTimeContainer.textContent =
+      currentDuration;
+    musicPlayerContainer.style.setProperty(
+      '--seek-width',
+      `${Math.floor(
+        (seekSlider.value / seekSlider.max) * 100
+      )}%`
+    );
+  } else if (volumeSlider === event.target) {
+    volumeContainer.textContent =
+      volumeSlider.value;
+    musicPlayerContainer.style.setProperty(
+      '--volume-width',
+      `${volumeSlider.value}%`
+    );
+  }
+};
+
+// we know metadata for audio has surely been loaded since loadedmetadata event can fire faster than event listener can be added if the browser loads the metadata quicker than usual. So, this conditional statement handles that case.
+if (audio.readyState > 0) {
+  displayDuration();
+  setSliderMaxAttribute();
+} else {
+  audio.addEventListener('loadedmetadata', () => {
+    displayDuration();
+    setSliderMaxAttribute();
+  });
+}
+
+function calculateTime(seconds) {
+  const numberOfMinutes = Math.floor(
+    seconds / 60
+  );
+  let numberOfSeconds = Math.floor(seconds % 60);
+
+  numberOfSeconds =
+    numberOfSeconds < 10
+      ? `0${numberOfSeconds}`
+      : numberOfSeconds;
+
+  const timeString = `${numberOfMinutes}:${numberOfSeconds}`;
+
+  return timeString;
+}
+
+audio.addEventListener(
+  'progress',
+  displayBufferedAmount
+);
+
+// timeupdate event is fired when audio.currentTime property is updated
+audio.addEventListener('timeupdate', () => {
+  seekSlider.value = Math.floor(
+    audio.currentTime
+  );
+});
+
+seekSlider.addEventListener(
+  'input',
+  showRangeProgress
+);
+
+seekSlider.addEventListener('change', () => {
+  audio.currentTime = seekSlider.value;
+});
+
+volumeSlider.addEventListener(
+  'input',
+  showRangeProgress
+);
+
 // ************** Startup DB *****************
 IDB();
