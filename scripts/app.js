@@ -672,5 +672,531 @@ function findAndSetMonthSelectedAttribute(
   setSelectedAttribute(selectMonth, monthName);
 }
 
-// ************** Startup DB *****************
+// ************** MUSIC PLAYER *****************
+let songs = [
+  "music/haven't_reached_the_start_line.mp3",
+  'music/lemon_water.mp3',
+  'music/strangers_wolfs_rain.mp3',
+  'music/support_system.mp3',
+  'music/the_day_before.mp3',
+  'music/underground_river.mp3',
+  'music/warm_heart.mp3',
+];
+
+let currentSongIndex = 0;
+
+const musicPlayerContainer =
+  document.querySelector('#music-player');
+const playPauseIconContainer =
+  document.querySelector('#play-icon');
+const muteIconContainer =
+  document.querySelector('#mute-icon');
+const prevIconContainer =
+  document.querySelector('#prev-icon');
+const nextIconContainer =
+  document.querySelector('#next-icon');
+const audio = document.querySelector('audio');
+const durationContainer =
+  document.querySelector('#duration');
+const currentTimeContainer =
+  document.querySelector('#current-time');
+const volumeContainer = document.querySelector(
+  '#volume-output'
+);
+const seekSlider = document.querySelector(
+  '#seek-slider'
+);
+const volumeSlider = document.querySelector(
+  '#volume-slider'
+);
+
+const playOrPauseAnimation = lottie.loadAnimation(
+  {
+    container: playPauseIconContainer,
+    path: 'https://maxst.icons8.com/vue-static/landings/animated-icons/icons/pause/pause.json',
+    renderer: 'svg',
+    loop: false,
+    autoplay: false,
+    name: 'Play/Pause Animation',
+  }
+);
+
+const muteAnimation = lottie.loadAnimation({
+  container: muteIconContainer,
+  path: 'https://maxst.icons8.com/vue-static/landings/animated-icons/icons/mute/mute.json',
+  renderer: 'svg',
+  loop: false,
+  autoplay: false,
+  name: 'Mute/Unmute Animation',
+});
+
+const prevAnimation = lottie.loadAnimation({
+  container: prevIconContainer,
+  path: 'https://maxst.icons8.com/vue-static/landings/animated-icons/icons/skip-backwards/skip-backwards.json',
+  renderer: 'svg',
+  loop: false,
+  autoplay: false,
+  name: 'Previous Button Animation',
+});
+
+const nextAnimation = lottie.loadAnimation({
+  container: nextIconContainer,
+  path: 'https://maxst.icons8.com/vue-static/landings/animated-icons/icons/skip-forwards/skip-forwards.json',
+  renderer: 'svg',
+  loop: false,
+  autoplay: false,
+  name: 'Next Button Animation',
+});
+
+playOrPauseAnimation.goToAndStop(14, true);
+
+let playOrPauseState = 'play';
+let muteState = 'mute';
+
+let reqAnimationFrame = null;
+const whilePlaying = () => {
+  seekSlider.value = Math.floor(
+    audio.currentTime
+  );
+  // update seekSlider values appropriately when user interacts with slider while audio is playing.
+  const currentDuration = calculateTime(
+    seekSlider.value
+  );
+  currentTimeContainer.textContent =
+    currentDuration;
+  musicPlayerContainer.style.setProperty(
+    '--seek-width',
+    `${
+      (seekSlider.value / seekSlider.max) * 100
+    }%`
+  );
+  reqAnimationFrame =
+    window.requestAnimationFrame(whilePlaying);
+};
+
+playPauseIconContainer.addEventListener(
+  'click',
+  () => {
+    if (playOrPauseState === 'play') {
+      if ('mediaSession' in navigator) {
+        updateMediaSessionMetadata();
+      }
+      audio.play();
+      playOrPauseAnimation.playSegments(
+        [14, 27],
+        true
+      );
+      // window.requestAnimationFrame() is asynchronous
+      // starts process to update slider when music is playing
+      window.requestAnimationFrame(whilePlaying);
+      playOrPauseState = 'pause';
+    } else {
+      // stops process to update slider when music is paused because user cannot interact with slider while music is playing.
+      audio.pause();
+      playOrPauseAnimation.playSegments(
+        [0, 14],
+        true
+      );
+      window.cancelAnimationFrame(
+        reqAnimationFrame
+      );
+      playOrPauseState = 'play';
+    }
+  }
+);
+
+muteIconContainer.addEventListener(
+  'click',
+  () => {
+    if (muteState === 'mute') {
+      muteAnimation.playSegments([0, 15], true);
+      muteState = 'unmute';
+      audio.muted = true;
+    } else {
+      muteAnimation.playSegments([15, 25], true);
+      muteState = 'mute';
+      audio.muted = false;
+    }
+  }
+);
+
+prevIconContainer.addEventListener(
+  'click',
+  () => {
+    prevSong();
+    prevAnimation.playSegments([10, 28], true);
+    playNewSong();
+    audio.play();
+  }
+);
+
+const prevSong = () => {
+  currentSongIndex--;
+  checkCurrentSongIndex(currentSongIndex);
+  audio.setAttribute(
+    'src',
+    `${songs[currentSongIndex]}`
+  );
+};
+
+nextIconContainer.addEventListener(
+  'click',
+  () => {
+    nextSong();
+    nextAnimation.playSegments([10, 28], true);
+    playNewSong();
+    audio.play();
+  }
+);
+
+const nextSong = () => {
+  currentSongIndex++;
+  checkCurrentSongIndex(currentSongIndex);
+  audio.setAttribute(
+    'src',
+    `${songs[currentSongIndex]}`
+  );
+};
+
+audio.onended = () => {
+  nextSong();
+  updateMediaSessionMetadata();
+  audio.play();
+};
+
+function checkCurrentSongIndex(songIndex) {
+  if (songIndex >= songs.length) {
+    currentSongIndex = 0;
+  } else if (songIndex < 0) {
+    currentSongIndex = songs.length - 1;
+  }
+
+  return;
+}
+
+// handle interacting with slider when audio is PLAYING
+seekSlider.addEventListener('input', () => {
+  const currentDuration = calculateTime(
+    seekSlider.value
+  );
+  currentTimeContainer.textContent =
+    currentDuration;
+
+  if (!audio.paused) {
+    window.cancelAnimationFrame(
+      reqAnimationFrame
+    );
+  }
+});
+
+// change event fired once user lets go of the slider ( thumb ) on range input element. If audio was playing before user interacted with slider, then this restart the process of playing the animation once user lets go of the thumb.
+seekSlider.addEventListener('change', () => {
+  audio.currentTime = seekSlider.value;
+  if (!audio.paused) {
+    window.requestAnimationFrame(whilePlaying);
+  }
+});
+
+const displayDuration = () => {
+  // audio.duration returns a value in seconds.
+  durationContainer.textContent = calculateTime(
+    audio.duration
+  );
+};
+
+const setSliderMaxAttribute = () => {
+  seekSlider.setAttribute(
+    'max',
+    Math.floor(audio.duration)
+  );
+};
+
+const displayBufferedAmount = () => {
+  try {
+    const bufferedAmount = audio.buffered.end(
+      audio.buffered.length - 1
+    );
+    musicPlayerContainer.style.setProperty(
+      '--buffered-width',
+      `${
+        (bufferedAmount / seekSlider.max) * 100
+      }%`
+    );
+  } catch (err) {
+    console.log('Buffer error: ' + err);
+  }
+};
+
+const showRangeProgress = (event) => {
+  if (seekSlider === event.target) {
+    const currentDuration = calculateTime(
+      seekSlider.value
+    );
+    currentTimeContainer.textContent =
+      currentDuration;
+    musicPlayerContainer.style.setProperty(
+      '--seek-width',
+      `${Math.floor(
+        (seekSlider.value / seekSlider.max) * 100
+      )}%`
+    );
+  } else if (volumeSlider === event.target) {
+    const volumeLevel = volumeSlider.value;
+    // audio.volume property has a value between zero and one.
+    audio.volume = volumeLevel / 100;
+    volumeContainer.textContent = volumeLevel;
+    musicPlayerContainer.style.setProperty(
+      '--volume-width',
+      `${volumeLevel}%`
+    );
+  }
+};
+
+// we know metadata for audio has surely been loaded since loadedmetadata event can fire faster than event listener can be added if the browser loads the metadata quicker than usual. So, this conditional statement handles that case.
+const playNewSong = () => {
+  if (audio.readyState > 0) {
+    displayDuration();
+    setSliderMaxAttribute();
+  } else {
+    audio.addEventListener(
+      'loadedmetadata',
+      () => {
+        displayDuration();
+        setSliderMaxAttribute();
+      }
+    );
+  }
+};
+
+playNewSong();
+
+function calculateTime(seconds) {
+  const numberOfMinutes = Math.floor(
+    seconds / 60
+  );
+  let numberOfSeconds = Math.floor(seconds % 60);
+
+  numberOfSeconds =
+    numberOfSeconds < 10
+      ? `0${numberOfSeconds}`
+      : numberOfSeconds;
+
+  const timeString = `${numberOfMinutes}:${numberOfSeconds}`;
+
+  return timeString;
+}
+
+audio.addEventListener(
+  'progress',
+  displayBufferedAmount
+);
+
+seekSlider.addEventListener(
+  'input',
+  showRangeProgress
+);
+
+seekSlider.addEventListener('change', () => {
+  audio.currentTime = seekSlider.value;
+});
+
+volumeSlider.addEventListener(
+  'input',
+  showRangeProgress
+);
+
+// ************** MEDIA SESSION API *****************
+if ('mediaSession' in navigator) {
+  const metaDataArray = [
+    new MediaMetadata({
+      title: "Haven't Reached the Starting Line",
+      artist: 'Yuki Hayashi & Asami Tachibana',
+      album: 'Haikyuu!! To The Top OST',
+      artwork: [
+        {
+          src: 'https://preview.redd.it/f4jtp6ruu2d51.jpg?auto=webp&s=ecc9844bf37b3c379f8599da0542af072ba2ad68',
+          sizes: '800x600',
+          type: 'image/jpg',
+        },
+      ],
+    }),
+    new MediaMetadata({
+      title: 'Lemon Water',
+      artist: 'Hiroyuki Komagata',
+      artwork: [
+        {
+          src: 'https://i.ytimg.com/vi/aSPPdqKYfTk/maxresdefault.jpg',
+          sizes: '1280x720',
+          type: 'image/jpg',
+        },
+      ],
+    }),
+    new MediaMetadata({
+      title: 'Strangers',
+      artist: 'Yoko Kanno & Raj Ramayya',
+      album: "Wolf's Rain OST",
+      artwork: [
+        {
+          src: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/f8eb502e-a06d-4dd3-8b28-a02f7a011e39/dctks4o-c770fe2f-195e-46f5-93cb-ecaba2ac45e5.png/v1/fill/w_700,h_233,q_70,strp/heaven_s_not_enough_by_mayhw_dctks4o-350t.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9NTM0IiwicGF0aCI6IlwvZlwvZjhlYjUwMmUtYTA2ZC00ZGQzLThiMjgtYTAyZjdhMDExZTM5XC9kY3RrczRvLWM3NzBmZTJmLTE5NWUtNDZmNS05M2NiLWVjYWJhMmFjNDVlNS5wbmciLCJ3aWR0aCI6Ijw9MTYwMCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.xvcpx1xPGLYXvoneBxgBfMc6bW4zzNenUKuxFdeT968',
+          sizes: '700x233',
+          type: 'image/jpg',
+        },
+      ],
+    }),
+    new MediaMetadata({
+      title: 'Support System',
+      artist: 'Yuki Hayashi & Asami Tachibana',
+      album: 'Haikyuu!! To The Top OST',
+      artwork: [
+        {
+          src: 'https://cdn.otakutale.com/wp-content/uploads/2019/11/Haikyuu-To-the-Top-Visual.jpg',
+          sizes: '1000x1357',
+          type: 'image/jpg',
+        },
+      ],
+    }),
+    new MediaMetadata({
+      title: 'The Day Before',
+      artist: 'Yuki Hayashi & Asami Tachibana',
+      album: 'Haikyuu!! To The Top OST',
+      artwork: [
+        {
+          src: 'https://i.ytimg.com/vi/0rZra7J2YWg/mqdefault.jpg',
+          sizes: '320x180',
+          type: 'image/jpg',
+        },
+      ],
+    }),
+    new MediaMetadata({
+      title: 'The Underground River',
+      artist: 'Kevin Penkin & Raj Ramayya',
+      album: 'Made In Abyss OST',
+      artwork: [
+        {
+          src: 'https://m.media-amazon.com/images/M/MV5BODNhNTYyODgtOWU5NS00Y2M4LTg5YzAtNzZlMTFiYjE0NTIxXkEyXkFqcGdeQXVyMzgxODM4NjM@._V1_FMjpg_UX1000_.jpg',
+          sizes: '1000x1471',
+          type: 'image/jpg',
+        },
+      ],
+    }),
+    new MediaMetadata({
+      title: 'Warm Heart',
+      artist: 'Kouki Yoshioka',
+      artwork: [
+        {
+          src: 'https://f4.bcbits.com/img/a3394043904_10.jpg',
+          sizes: '1200x1200',
+          type: 'image/jpg',
+        },
+      ],
+    }),
+  ];
+
+  const updatePositionState = () => {
+    navigator.mediaSession.setPositionState({
+      duration: audio.duration,
+      playbackRate: audio.playbackRate,
+      position: audio.currentTime,
+    });
+  };
+
+  function updateMediaSessionMetadata() {
+    navigator.mediaSession.metadata =
+      metaDataArray[currentSongIndex];
+  }
+
+  const playHandler = () => {
+    updateMediaSessionMetadata();
+    playOrPauseAnimation.playSegments(
+      [14, 27],
+      true
+    );
+    playOrPauseState = 'pause';
+    audio.play();
+    updatePositionState();
+  };
+
+  const pauseHandler = () => {
+    playOrPauseAnimation.playSegments(
+      [0, 14],
+      true
+    );
+    playOrPauseState = 'play';
+    audio.pause();
+    updatePositionState();
+  };
+
+  const previousTrackHandler = () => {
+    prevAnimation.playSegments([10, 28], true);
+    prevSong();
+    updateMediaSessionMetadata();
+    audio.play();
+  };
+
+  const nextTrackHandler = () => {
+    nextAnimation.playSegments([10, 28], true);
+    nextSong();
+    updateMediaSessionMetadata();
+    audio.play();
+  };
+
+  const seekBackwardHandler = (details) => {
+    audio.currentTime =
+      audio.currentTime -
+      (details.seekOffset || 10);
+    updatePositionState();
+  };
+
+  const seekForwardHandler = (details) => {
+    audio.currentTime =
+      audio.currentTime +
+      (details.seekOffset || 10);
+    updatePositionState();
+  };
+
+  const seekToHandler = (details) => {
+    if (details.fastSeek && 'fastSeek' in audio) {
+      audio.fastSeek(details.fastSeek);
+      updatePositionState();
+      return;
+    }
+
+    audio.currentTime = details.seekTime;
+    updatePositionState();
+  };
+
+  const stopHandler = () => {
+    audio.pause();
+    audio.currentTime = 0;
+  };
+
+  const actionsAndHandlers = [
+    ['play', playHandler],
+    ['pause', pauseHandler],
+    ['previoustrack', previousTrackHandler],
+    ['nexttrack', nextTrackHandler],
+    ['seekbackward', seekBackwardHandler],
+    ['seekforward', seekForwardHandler],
+    ['seekto', seekToHandler],
+    ['stop', stopHandler],
+  ];
+
+  for (const [
+    action,
+    handler,
+  ] of actionsAndHandlers) {
+    try {
+      navigator.mediaSession.setActionHandler(
+        action,
+        handler
+      );
+    } catch (err) {
+      console.log(
+        `The media session action, ${action}, is not supported`
+      );
+    }
+  }
+}
+
+// ************** STARTUP DB *****************
 IDB();
