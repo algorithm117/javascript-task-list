@@ -457,12 +457,23 @@ function buildNoTaskLi() {
 
 // ************** MUSCIC PLAYER *****************
 
+let songs = [
+  'music/sonny.mp3',
+  'music/face_my_fears.mp3',
+];
+
+let currentSongIndex = 0;
+
 const musicPlayerContainer =
   document.querySelector('#music-player');
 const playPauseIconContainer =
   document.querySelector('#play-icon');
 const muteIconContainer =
   document.querySelector('#mute-icon');
+const prevIconContainer =
+  document.querySelector('#prev-icon');
+const nextIconContainer =
+  document.querySelector('#next-icon');
 const audio = document.querySelector('audio');
 const durationContainer =
   document.querySelector('#duration');
@@ -498,31 +509,170 @@ const muteAnimation = lottie.loadAnimation({
   name: 'Mute/Unmute Animation',
 });
 
+const prevAnimation = lottie.loadAnimation({
+  container: prevIconContainer,
+  path: 'https://maxst.icons8.com/vue-static/landings/animated-icons/icons/skip-backwards/skip-backwards.json',
+  renderer: 'svg',
+  loop: false,
+  autoplay: false,
+  name: 'Previous Button Animation',
+});
+
+const nextAnimation = lottie.loadAnimation({
+  container: nextIconContainer,
+  path: 'https://maxst.icons8.com/vue-static/landings/animated-icons/icons/skip-forwards/skip-forwards.json',
+  renderer: 'svg',
+  loop: false,
+  autoplay: false,
+  name: 'Next Button Animation',
+});
+
 playOrPauseAnimation.goToAndStop(14, true);
 
 let playOrPauseState = 'play';
 let muteState = 'mute';
 
+let reqAnimationFrame = null;
+const whilePlaying = () => {
+  seekSlider.value = Math.floor(
+    audio.currentTime
+  );
+  // update seekSlider values appropriately when user interacts with slider while audio is playing.
+  const currentDuration = calculateTime(
+    seekSlider.value
+  );
+  currentTimeContainer.textContent =
+    currentDuration;
+  musicPlayerContainer.style.setProperty(
+    '--seek-width',
+    `${
+      (seekSlider.value / seekSlider.max) * 100
+    }%`
+  );
+  reqAnimationFrame =
+    window.requestAnimationFrame(whilePlaying);
+};
+
 playPauseIconContainer.addEventListener(
   'click',
   () => {
     if (playOrPauseState === 'play') {
+      if ('mediaSession' in navigator) {
+        updateMediaSessionMetadata();
+      }
       audio.play();
-      playOrPauseState = 'pause';
       playOrPauseAnimation.playSegments(
         [14, 27],
         true
       );
+      // window.requestAnimationFrame() is asynchronous
+      // starts process to update slider when music is playing
+      window.requestAnimationFrame(whilePlaying);
+      playOrPauseState = 'pause';
     } else {
+      // stops process to update slider when music is paused because user cannot interact with slider while music is playing.
       audio.pause();
-      playOrPauseState = 'play';
       playOrPauseAnimation.playSegments(
         [0, 14],
         true
       );
+      window.cancelAnimationFrame(
+        reqAnimationFrame
+      );
+      playOrPauseState = 'play';
     }
   }
 );
+
+muteIconContainer.addEventListener(
+  'click',
+  () => {
+    if (muteState === 'mute') {
+      muteAnimation.playSegments([0, 15], true);
+      muteState = 'unmute';
+      audio.muted = true;
+    } else {
+      muteAnimation.playSegments([15, 25], true);
+      muteState = 'mute';
+      audio.muted = false;
+    }
+  }
+);
+
+prevIconContainer.addEventListener(
+  'click',
+  () => {
+    prevSong();
+    prevAnimation.playSegments([10, 28], true);
+    playNewSong();
+    audio.play();
+  }
+);
+
+const prevSong = () => {
+  currentSongIndex--;
+  checkCurrentSongIndex(currentSongIndex);
+  audio.setAttribute(
+    'src',
+    `${songs[currentSongIndex]}`
+  );
+};
+
+nextIconContainer.addEventListener(
+  'click',
+  () => {
+    nextSong();
+    nextAnimation.playSegments([10, 28], true);
+    playNewSong();
+    audio.play();
+  }
+);
+
+const nextSong = () => {
+  currentSongIndex++;
+  checkCurrentSongIndex(currentSongIndex);
+  audio.setAttribute(
+    'src',
+    `${songs[currentSongIndex]}`
+  );
+};
+
+audio.onended = () => {
+  console.log('song ended');
+};
+
+function checkCurrentSongIndex(songIndex) {
+  if (songIndex >= songs.length) {
+    currentSongIndex = 0;
+  } else if (songIndex < 0) {
+    currentSongIndex = songs.length - 1;
+  }
+
+  return;
+}
+
+// handle interacting with slider when audio is PLAYING
+seekSlider.addEventListener('input', () => {
+  const currentDuration = calculateTime(
+    seekSlider.value
+  );
+  currentTimeContainer.textContent =
+    currentDuration;
+
+  if (!audio.paused) {
+    window.cancelAnimationFrame(
+      reqAnimationFrame
+    );
+  }
+});
+
+// change event fired once user lets go of the slider ( thumb ) on range input element. If audio was playing before user interacted with slider, then this restart the process of playing the animation once user lets go of the thumb.
+seekSlider.addEventListener('change', () => {
+  audio.currentTime = seekSlider.value;
+  if (!audio.paused) {
+    window.requestAnimationFrame(whilePlaying);
+  }
+});
 
 const displayDuration = () => {
   // audio.duration returns a value in seconds.
@@ -539,15 +689,19 @@ const setSliderMaxAttribute = () => {
 };
 
 const displayBufferedAmount = () => {
-  const bufferedAmount = audio.buffered.end(
-    audio.buffered.length - 1
-  );
-  musicPlayerContainer.style.setProperty(
-    '--buffered-width',
-    `${Math.floor(
-      (bufferedAmount / seekSlider.max) * 100
-    )}%`
-  );
+  try {
+    const bufferedAmount = audio.buffered.end(
+      audio.buffered.length - 1
+    );
+    musicPlayerContainer.style.setProperty(
+      '--buffered-width',
+      `${
+        (bufferedAmount / seekSlider.max) * 100
+      }%`
+    );
+  } catch (err) {
+    console.log('Buffer error: ' + err);
+  }
 };
 
 const showRangeProgress = (event) => {
@@ -564,25 +718,34 @@ const showRangeProgress = (event) => {
       )}%`
     );
   } else if (volumeSlider === event.target) {
-    volumeContainer.textContent =
-      volumeSlider.value;
+    const volumeLevel = volumeSlider.value;
+    // audio.volume property has a value between zero and one.
+    audio.volume = volumeLevel / 100;
+    volumeContainer.textContent = volumeLevel;
     musicPlayerContainer.style.setProperty(
       '--volume-width',
-      `${volumeSlider.value}%`
+      `${volumeLevel}%`
     );
   }
 };
 
 // we know metadata for audio has surely been loaded since loadedmetadata event can fire faster than event listener can be added if the browser loads the metadata quicker than usual. So, this conditional statement handles that case.
-if (audio.readyState > 0) {
-  displayDuration();
-  setSliderMaxAttribute();
-} else {
-  audio.addEventListener('loadedmetadata', () => {
+const playNewSong = () => {
+  if (audio.readyState > 0) {
     displayDuration();
     setSliderMaxAttribute();
-  });
-}
+  } else {
+    audio.addEventListener(
+      'loadedmetadata',
+      () => {
+        displayDuration();
+        setSliderMaxAttribute();
+      }
+    );
+  }
+};
+
+playNewSong();
 
 function calculateTime(seconds) {
   const numberOfMinutes = Math.floor(
@@ -605,13 +768,6 @@ audio.addEventListener(
   displayBufferedAmount
 );
 
-// timeupdate event is fired when audio.currentTime property is updated
-audio.addEventListener('timeupdate', () => {
-  seekSlider.value = Math.floor(
-    audio.currentTime
-  );
-});
-
 seekSlider.addEventListener(
   'input',
   showRangeProgress
@@ -626,5 +782,113 @@ volumeSlider.addEventListener(
   showRangeProgress
 );
 
-// ************** Startup DB *****************
+// ************** MEDIA SESSION API *****************
+if ('mediaSession' in navigator) {
+  const metaDataArray = [
+    new MediaMetadata({
+      title: 'About Time',
+      artist: 'Lee Sang Hoon',
+      artwork: [
+        {
+          src: '//lh3.googleusercontent.com/X4DQQa20zy6EvJFw2VQYzyiwk-Ou82tFYJmWO55WAfQAidi57m6OAzmjwJfwVoQs58pZTA=s151',
+          sizes: '360x202',
+          type: 'image/jpg',
+        },
+      ],
+    }),
+  ];
+
+  const updatePositionState = () => {
+    navigator.mediaSession.setPositionState({
+      duration: audio.duration,
+      playbackRate: audio.playbackRate,
+      position: audio.currentTime,
+    });
+  };
+
+  function updateMediaSessionMetadata() {
+    navigator.mediaSession.metadata =
+      metaDataArray[currentSongIndex];
+  }
+
+  const playHandler = () => {
+    updateMediaSessionMetadata();
+    audio.play();
+    updatePositionState();
+  };
+
+  const pauseHandler = () => {
+    audio.pause();
+    updatePositionState();
+  };
+
+  const previousTrackHandler = () => {
+    prevSong();
+    updateMediaSessionMetadata();
+  };
+
+  const nextTrackHandler = () => {
+    nextSong();
+    updateMediaSessionMetadata();
+  };
+
+  const seekBackwardHandler = (details) => {
+    audio.currentTime =
+      audio.currentTime -
+      (details.seekOffset || 10);
+    updatePositionState();
+  };
+
+  const seekForwardHandler = (details) => {
+    audio.currentTime =
+      audio.currentTime +
+      (details.seekOffset || 10);
+    updatePositionState();
+  };
+
+  const seekToHandler = (details) => {
+    if (details.fastSeek && 'fastSeek' in audio) {
+      audio.fastSeek(details.fastSeek);
+      updatePositionState();
+      return;
+    }
+
+    audio.currentTime = details.seekTime;
+    updatePositionState();
+  };
+
+  const stopHandler = () => {
+    audio.pause();
+    audio.currentTime = 0;
+  };
+
+  const actionsAndHandlers = [
+    ['play', playHandler],
+    ['pause', pauseHandler],
+    ['previoustrack', previousTrackHandler],
+    ['nexttrack', nextTrackHandler],
+    ['seekbackward', seekBackwardHandler],
+    ['seekforward', seekForwardHandler],
+    ['seekto', seekToHandler],
+    ['stop', stopHandler],
+  ];
+
+  for (const [
+    action,
+    handler,
+  ] of actionsAndHandlers) {
+    try {
+      navigator.mediaSession.setActionHandler(
+        action,
+        handler
+      );
+    } catch (err) {
+      console.log(
+        `The media session action, ${action}, is not supported`
+      );
+    }
+  }
+}
+
+// ************** STARTUP DB *****************
 IDB();
