@@ -226,11 +226,48 @@
           </form>
         </section>
 
-        <section id="logging-db-status">
-          <div class="logging-container">
-            <ul class="logs"></ul>
+        <div class="log-music-container">
+          <section id="logging-db-status">
+            <div class="logging-container">
+              <ul class="logs"></ul>
+            </div>
+          </section>
+          <div id="music-player">
+            <div class="playing-time">
+              <audio
+                src="music/haven't_reached_the_start_line.mp3"
+                preload="metadata"
+              ></audio>
+              <button id="play-icon"></button>
+              <span id="current-time" class="time"
+                >0:00</span
+              >
+              <input
+                type="range"
+                id="seek-slider"
+                max="100"
+                value="0"
+              />
+              <span id="duration" class="time"
+                >0:00</span
+              >
+            </div>
+            <div class="volume">
+              <button id="prev-icon"></button>
+              <button id="next-icon"></button>
+              <output id="volume-output"
+                >50</output
+              >
+              <input
+                type="range"
+                id="volume-slider"
+                max="100"
+                value="50"
+              />
+              <button id="mute-icon"></button>
+            </div>
           </div>
-        </section>
+        </div>
       </div>
     </div>
 
