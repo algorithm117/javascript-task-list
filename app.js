@@ -458,8 +458,13 @@ function buildNoTaskLi() {
 // ************** MUSCIC PLAYER *****************
 
 let songs = [
-  'music/sonny.mp3',
-  'music/face_my_fears.mp3',
+  "music/haven't_reached_the_start_line.mp3",
+  'music/lemon_water.mp3',
+  'music/strangers_wolfs_rain.mp3',
+  'music/support_system.mp3',
+  'music/the_day_before.mp3',
+  'music/underground_river.mp3',
+  'music/warm_heart.mp3',
 ];
 
 let currentSongIndex = 0;
@@ -638,7 +643,9 @@ const nextSong = () => {
 };
 
 audio.onended = () => {
-  console.log('song ended');
+  nextSong();
+  updateMediaSessionMetadata();
+  audio.play();
 };
 
 function checkCurrentSongIndex(songIndex) {
@@ -786,12 +793,83 @@ volumeSlider.addEventListener(
 if ('mediaSession' in navigator) {
   const metaDataArray = [
     new MediaMetadata({
-      title: 'About Time',
-      artist: 'Lee Sang Hoon',
+      title: "Haven't Reached the Starting Line",
+      artist: 'Yuki Hayashi & Asami Tachibana',
+      album: 'Haikyuu!! To The Top OST',
       artwork: [
         {
-          src: '//lh3.googleusercontent.com/X4DQQa20zy6EvJFw2VQYzyiwk-Ou82tFYJmWO55WAfQAidi57m6OAzmjwJfwVoQs58pZTA=s151',
-          sizes: '360x202',
+          src: 'https://preview.redd.it/f4jtp6ruu2d51.jpg?auto=webp&s=ecc9844bf37b3c379f8599da0542af072ba2ad68',
+          sizes: '800x600',
+          type: 'image/jpg',
+        },
+      ],
+    }),
+    new MediaMetadata({
+      title: 'Lemon Water',
+      artist: 'Hiroyuki Komagata',
+      artwork: [
+        {
+          src: 'https://i.ytimg.com/vi/aSPPdqKYfTk/maxresdefault.jpg',
+          sizes: '1280x720',
+          type: 'image/jpg',
+        },
+      ],
+    }),
+    new MediaMetadata({
+      title: 'Strangers',
+      artist: 'Yoko Kanno & Raj Ramayya',
+      album: "Wolf's Rain OST",
+      artwork: [
+        {
+          src: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/f8eb502e-a06d-4dd3-8b28-a02f7a011e39/dctks4o-c770fe2f-195e-46f5-93cb-ecaba2ac45e5.png/v1/fill/w_700,h_233,q_70,strp/heaven_s_not_enough_by_mayhw_dctks4o-350t.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9NTM0IiwicGF0aCI6IlwvZlwvZjhlYjUwMmUtYTA2ZC00ZGQzLThiMjgtYTAyZjdhMDExZTM5XC9kY3RrczRvLWM3NzBmZTJmLTE5NWUtNDZmNS05M2NiLWVjYWJhMmFjNDVlNS5wbmciLCJ3aWR0aCI6Ijw9MTYwMCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.xvcpx1xPGLYXvoneBxgBfMc6bW4zzNenUKuxFdeT968',
+          sizes: '700x233',
+          type: 'image/jpg',
+        },
+      ],
+    }),
+    new MediaMetadata({
+      title: 'Support System',
+      artist: 'Yuki Hayashi & Asami Tachibana',
+      album: 'Haikyuu!! To The Top OST',
+      artwork: [
+        {
+          src: 'https://cdn.otakutale.com/wp-content/uploads/2019/11/Haikyuu-To-the-Top-Visual.jpg',
+          sizes: '1000x1357',
+          type: 'image/jpg',
+        },
+      ],
+    }),
+    new MediaMetadata({
+      title: 'The Day Before',
+      artist: 'Yuki Hayashi & Asami Tachibana',
+      album: 'Haikyuu!! To The Top OST',
+      artwork: [
+        {
+          src: 'https://i.ytimg.com/vi/0rZra7J2YWg/mqdefault.jpg',
+          sizes: '320x180',
+          type: 'image/jpg',
+        },
+      ],
+    }),
+    new MediaMetadata({
+      title: 'The Underground River',
+      artist: 'Kevin Penkin & Raj Ramayya',
+      album: 'Made In Abyss OST',
+      artwork: [
+        {
+          src: 'https://m.media-amazon.com/images/M/MV5BODNhNTYyODgtOWU5NS00Y2M4LTg5YzAtNzZlMTFiYjE0NTIxXkEyXkFqcGdeQXVyMzgxODM4NjM@._V1_FMjpg_UX1000_.jpg',
+          sizes: '1000x1471',
+          type: 'image/jpg',
+        },
+      ],
+    }),
+    new MediaMetadata({
+      title: 'Warm Heart',
+      artist: 'Kouki Yoshioka',
+      artwork: [
+        {
+          src: 'https://f4.bcbits.com/img/a3394043904_10.jpg',
+          sizes: '1200x1200',
           type: 'image/jpg',
         },
       ],
@@ -813,23 +891,37 @@ if ('mediaSession' in navigator) {
 
   const playHandler = () => {
     updateMediaSessionMetadata();
+    playOrPauseAnimation.playSegments(
+      [14, 27],
+      true
+    );
+    playOrPauseState = 'pause';
     audio.play();
     updatePositionState();
   };
 
   const pauseHandler = () => {
+    playOrPauseAnimation.playSegments(
+      [0, 14],
+      true
+    );
+    playOrPauseState = 'play';
     audio.pause();
     updatePositionState();
   };
 
   const previousTrackHandler = () => {
+    prevAnimation.playSegments([10, 28], true);
     prevSong();
     updateMediaSessionMetadata();
+    audio.play();
   };
 
   const nextTrackHandler = () => {
+    nextAnimation.playSegments([10, 28], true);
     nextSong();
     updateMediaSessionMetadata();
+    audio.play();
   };
 
   const seekBackwardHandler = (details) => {
