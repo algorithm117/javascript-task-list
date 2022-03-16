@@ -24,9 +24,10 @@
       href="https://fonts.googleapis.com/css2?family=Bellota:ital,wght@1,300&family=Bubbler+One&family=Cinzel+Decorative&family=The+Girl+Next+Door&display=swap"
       rel="stylesheet"
     />
+
     <link
       rel="stylesheet"
-      href="styles/styles.css"
+      href="./styles/styles.css"
     />
 
     <title>Task List App</title>
@@ -71,7 +72,7 @@
                 <input
                   type="number"
                   min="0"
-                  max="12"
+                  max="23"
                   class="task-hours"
                   required
                 />
@@ -86,16 +87,6 @@
                   class="task-minutes"
                   required
                 />
-
-                <select id="am-pm" required>
-                  <option
-                    value="AM"
-                    selected="selected"
-                  >
-                    AM
-                  </option>
-                  <option value="PM">PM</option>
-                </select>
               </div>
 
               <div class="task-date-user-input">
@@ -235,7 +226,7 @@
           <div id="music-player">
             <div class="playing-time">
               <audio
-                src="music/haven't_reached_the_start_line.mp3"
+                src="./music/haven't_reached_the_start_line.mp3"
                 preload="metadata"
               ></audio>
               <button id="play-icon"></button>
@@ -277,9 +268,9 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
-    <script src="scripts/app.js"></script>
+    <script src="./scripts/app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tsparticles@1/tsparticles.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tsparticles-preset-snow@1/tsparticles.preset.snow.min.js"></script>
-    <script src="scripts/particleConfiguration.js"></script>
+    <script src="./scripts/particleConfiguration.js"></script>
   </body>
 </html>

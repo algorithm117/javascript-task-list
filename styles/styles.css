@@ -218,20 +218,12 @@ span.task-date {
   margin-left: 0.5rem;
 }
 
-span.am-pm {
-  font-size: 1.83rem;
-}
-
-input.task-hours,
-input.task-minutes {
-  width: 10%;
-}
-
 .delete-span {
   display: flex;
   align-items: center;
   justify-content: center;
   margin-left: 2rem;
+  margin-right: 1rem;
   height: 3.4rem;
   width: 3.4rem;
   background-color: #6e3cbc;
@@ -437,6 +429,7 @@ input.task-minutes {
   background-color: #98bae7;
   padding: 0.5rem 1.5rem;
   border-radius: 0.5rem;
+  opacity: 0.9;
   --seek-width: 0%;
   --volume-width: 50%;
   --buffered-width: 0%;
@@ -499,7 +492,7 @@ input[type='range']::before {
   top: 0.9rem;
   left: 0;
   height: 0.3rem;
-  background-color: #a685e2;
+  background-color: #795caf;
   cursor: pointer;
 }
 

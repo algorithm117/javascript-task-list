@@ -1,5 +1,3 @@
-// since the notificationIsSet property is set once and persisted by the database, if you currently close your application, the setTimeout function will not register again for the notification, however the notificationIsSet property will still be true in the database. Just be aware of this behavior while testing.
-
 // ************** GLOBAL VARIABLES/SELECTORS SECTION *****************
 
 const displayTasksDiv = document.querySelector(
@@ -35,23 +33,24 @@ function getPermission() {
       createLog(
         'Notification permission granted'
       );
+      buildList();
     } else {
       Notification.requestPermission()
         .then((response) => {
           createLog(
             'Notification permission granted'
           );
+          buildList();
         })
         .catch((error) => {
-          createLog('Requesting permisson error');
+          createLog('Permission not granted2');
         });
     }
   }
 }
 
 function setNotification(task) {
-  let { taskTitle, taskTime, taskDate, amOrPM } =
-    task;
+  let { taskTitle, taskTime, taskDate } = task;
 
   const sameDay = checkForSameDay(taskDate);
 
@@ -60,11 +59,7 @@ function setNotification(task) {
     // set notification if there was not one previously set.
     if (!task.notificationIsSet) {
       const setTimeoutMilliseconds =
-        calculateMilliseconds(
-          taskDate,
-          taskTime,
-          amOrPM
-        );
+        calculateMilliseconds(taskDate, taskTime);
 
       // set notification for future tasks and not past tasks
       if (setTimeoutMilliseconds >= 0) {
@@ -105,8 +100,7 @@ function updateTaskNotificationSetProperty(task) {
 
 function calculateMilliseconds(
   taskDate,
-  taskTime,
-  amOrPM
+  taskTime
 ) {
   const numberOfMillisecondsInOneMinute =
     60 * 1000;
@@ -120,14 +114,12 @@ function calculateMilliseconds(
     taskTime
   );
 
-  let hours = setHours(dateForTask, amOrPM);
-
   let taskDateMilliseconds =
-    hours * numberOfMillisecondsInOneHour +
+    dateForTask.getHours() *
+      numberOfMillisecondsInOneHour +
     dateForTask.getMinutes() *
       numberOfMillisecondsInOneMinute;
 
-  // Need to mod by 12 since user input for hours in HTML form is restricted to values between 0 - 12
   const currentTimeMilliseconds =
     dateNow.getHours() *
       numberOfMillisecondsInOneHour +
@@ -150,10 +142,11 @@ function createSetTimeoutForNotification(
     let title = taskTitle;
     let options = {
       body: "It's time to start your task!",
-      icon: 'images/bell.png',
+      icon: '../images/bell.png',
       timestamp: new Date().toLocaleDateString(),
     };
-    let notification = new Notification(
+
+    const notification = new Notification(
       title,
       options
     );
@@ -171,7 +164,7 @@ function createSetTimeoutForNotification(
 const IDB = function () {
   db = null;
   objectStore = null;
-  DBOpenReq = indexedDB.open('MagicalTasksDB', 1);
+  DBOpenReq = indexedDB.open('MagicalTasksDB', 2);
 
   DBOpenReq.addEventListener('error', (error) => {
     createLog('Error in opening database');
@@ -263,8 +256,7 @@ function appendTaskToList(task) {
   const expiredTaskDate =
     checkForExpiredTaskDateAndTime(
       task.taskDate,
-      task.taskTime,
-      task.amOrPM
+      task.taskTime
     );
 
   // do not append task to list if it has expired & delete from database.
@@ -279,15 +271,44 @@ function appendTaskToList(task) {
     task.id
   }><span class="task-title">${
     task.taskTitle
-  }</span> <span class="right-arrow-span"><img src="images/arrows.png" alt="right arrow" class="arrow-icon" /></span> <span class="task-time">${
+  }</span> <span class="right-arrow-span"></span> <span class="task-time">${
     task.taskTime
-  } <span class="am-pm">${
-    task.amOrPM
-  }</span>,</span> <span class="task-date">${
+  }</span> <span class="task-date">${
     daysOfTheWeek[date.getDay()]
-  } ${date.toLocaleDateString()}</span> <span class="delete-span"><img src="images/cross.png" alt="cross sign" class="delete-task-icon" /></span></li>`;
+  } ${date.toLocaleDateString()}</span> <span class="delete-span"></span></li>`;
 
   tasksUl.insertAdjacentHTML('afterbegin', li);
+
+  const rightArrowSpan = document.querySelector(
+    '.right-arrow-span'
+  );
+  const deleteSpan = document.querySelector(
+    '.delete-span'
+  );
+
+  const arrowImg = document.createElement('img');
+  arrowImg.src = '../images/arrows.png';
+  arrowImg.alt = 'right arrow';
+  arrowImg.setAttribute('class', 'arrow-icon');
+  arrowImg.setAttribute(
+    'crossorigin',
+    'crossorigin'
+  );
+
+  const deleteImg = document.createElement('img');
+  deleteImg.src = '../images/cross.png';
+  deleteImg.alt = 'cross sign';
+  deleteImg.setAttribute(
+    'class',
+    'delete-task-icon'
+  );
+  deleteImg.setAttribute(
+    'crossorigin',
+    'crossorigin'
+  );
+
+  rightArrowSpan.appendChild(arrowImg);
+  deleteSpan.appendChild(deleteImg);
 
   document
     .querySelector('.delete-span')
@@ -449,9 +470,6 @@ taskForm.addEventListener('submit', (event) => {
     '.select-year'
   ).value;
 
-  let amOrPM =
-    document.querySelector('#am-pm').value;
-
   let taskDate = `${year}/${monthsMap.get(
     month
   )}/${day}`;
@@ -461,8 +479,7 @@ taskForm.addEventListener('submit', (event) => {
   const expiredTaskDate =
     checkForExpiredTaskDateAndTime(
       taskDate,
-      taskTime,
-      amOrPM
+      taskTime
     );
 
   if (expiredTaskDate) {
@@ -477,7 +494,6 @@ taskForm.addEventListener('submit', (event) => {
     taskTitle,
     taskTime,
     taskDate,
-    amOrPM,
     notificationIsSet: false,
   };
 
@@ -561,8 +577,7 @@ function createDateFromDateAndTime(date, time) {
 
 function checkForExpiredTaskDateAndTime(
   date,
-  time,
-  amOrPM
+  time
 ) {
   let dateForTask = createDateFromDateAndTime(
     date,
@@ -570,11 +585,6 @@ function checkForExpiredTaskDateAndTime(
   );
 
   const currentDate = new Date();
-
-  let dateForTaskHours = setHours(
-    dateForTask,
-    amOrPM
-  );
 
   if (
     dateForTask.getFullYear() <
@@ -591,27 +601,23 @@ function checkForExpiredTaskDateAndTime(
   ) {
     return true;
   } else if (
-    dateForTaskHours < currentDate.getHours()
+    dateForTask.getHours() <
+    currentDate.getHours()
   ) {
     return true;
+  } else if (
+    dateForTask.getHours() ===
+    currentDate.getHours()
+  ) {
+    if (
+      dateForTask.getMinutes() <
+      currentDate.getMinutes()
+    ) {
+      return true;
+    }
   }
 
-  return (
-    dateForTask.getMinutes() <
-    currentDate.getMinutes()
-  );
-}
-
-function setHours(date, amOrPM) {
-  let hours = date.getHours();
-
-  if (amOrPM === 'PM') {
-    hours = hours + 12;
-  } else if (date.getHours() > 11) {
-    hours = hours - 12;
-  }
-
-  return hours;
+  return false;
 }
 
 // ************** SET DATE INPUTS ON FORM *****************
@@ -674,13 +680,13 @@ function findAndSetMonthSelectedAttribute(
 
 // ************** MUSIC PLAYER *****************
 let songs = [
-  "music/haven't_reached_the_start_line.mp3",
-  'music/lemon_water.mp3',
-  'music/strangers_wolfs_rain.mp3',
-  'music/support_system.mp3',
-  'music/the_day_before.mp3',
-  'music/underground_river.mp3',
-  'music/warm_heart.mp3',
+  "../music/haven't_reached_the_start_line.mp3",
+  '../music/lemon_water.mp3',
+  '../music/strangers_wolfs_rain.mp3',
+  '../music/support_system.mp3',
+  '../music/the_day_before.mp3',
+  '../music/underground_river.mp3',
+  '../music/warm_heart.mp3',
 ];
 
 let currentSongIndex = 0;
@@ -786,6 +792,7 @@ playPauseIconContainer.addEventListener(
         [14, 27],
         true
       );
+
       // window.requestAnimationFrame() is asynchronous
       // starts process to update slider when music is playing
       window.requestAnimationFrame(whilePlaying);
@@ -833,10 +840,7 @@ prevIconContainer.addEventListener(
 const prevSong = () => {
   currentSongIndex--;
   checkCurrentSongIndex(currentSongIndex);
-  audio.setAttribute(
-    'src',
-    `${songs[currentSongIndex]}`
-  );
+  audio.src = songs[currentSongIndex];
 };
 
 nextIconContainer.addEventListener(
@@ -852,10 +856,7 @@ nextIconContainer.addEventListener(
 const nextSong = () => {
   currentSongIndex++;
   checkCurrentSongIndex(currentSongIndex);
-  audio.setAttribute(
-    'src',
-    `${songs[currentSongIndex]}`
-  );
+  audio.src = songs[currentSongIndex];
 };
 
 audio.onended = () => {
