@@ -142,7 +142,7 @@ function createSetTimeoutForNotification(
     let title = taskTitle;
     let options = {
       body: "It's time to start your task!",
-      icon: '../images/bell.png',
+      icon: './bell.png',
       timestamp: new Date().toLocaleDateString(),
     };
 
@@ -287,7 +287,7 @@ function appendTaskToList(task) {
   );
 
   const arrowImg = document.createElement('img');
-  arrowImg.src = '../images/arrows.png';
+  arrowImg.src = './arrows.png';
   arrowImg.alt = 'right arrow';
   arrowImg.setAttribute('class', 'arrow-icon');
   arrowImg.setAttribute(
@@ -296,7 +296,7 @@ function appendTaskToList(task) {
   );
 
   const deleteImg = document.createElement('img');
-  deleteImg.src = '../images/cross.png';
+  deleteImg.src = './cross.png';
   deleteImg.alt = 'cross sign';
   deleteImg.setAttribute(
     'class',
