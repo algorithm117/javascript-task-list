@@ -19,7 +19,7 @@ of my current skill level and understanding with HTML, CSS,
 
 ## Tech/Frameworks Used
 
-HTML5, CSS3, Modern JavaScript, Particle.js, IndexedDB.
+HTML5, CSS3, Modern JavaScript, Lottie, Particle.js, IndexedDB.
 
 ## How To Use
 
