@@ -680,13 +680,13 @@ function findAndSetMonthSelectedAttribute(
 
 // ************** MUSIC PLAYER *****************
 let songs = [
-  "../music/haven't_reached_the_start_line.mp3",
-  '../music/lemon_water.mp3',
-  '../music/strangers_wolfs_rain.mp3',
-  '../music/support_system.mp3',
-  '../music/the_day_before.mp3',
-  '../music/underground_river.mp3',
-  '../music/warm_heart.mp3',
+  "./haven't_reached_the_start_line.mp3",
+  './lemon_water.mp3',
+  './strangers_wolfs_rain.mp3',
+  './support_system.mp3',
+  './the_day_before.mp3',
+  './underground_river.mp3',
+  './warm_heart.mp3',
 ];
 
 let currentSongIndex = 0;
