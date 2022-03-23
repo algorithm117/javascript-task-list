@@ -16,11 +16,13 @@ of my current skill level and understanding with HTML, CSS,
 
 ## Screenshots
 
-![Task List App](https://i.gyazo.com/19c8cc0a874118e5f23eb5ea7c467d6a.png)
+<p float="left">
+  <img src="https://i.gyazo.com/19c8cc0a874118e5f23eb5ea7c467d6a.png" alt="Task List App" width="500" height="500" />
 
-![Media Session API](https://i.gyazo.com/1cc9abc39ab0b54026236c71e92ac8dd.png)
+  <img src="https://i.gyazo.com/1cc9abc39ab0b54026236c71e92ac8dd.png" alt="Media Session API" width="500" height="500" />
 
-![Notification](https://i.gyazo.com/d79b17b07e281e070407bc7b9f2f1e61.png)
+  <img src="https://i.gyazo.com/d79b17b07e281e070407bc7b9f2f1e61.png" alt="Notification" width="500" height="500" />
+</p>
 
 ## Features
 
