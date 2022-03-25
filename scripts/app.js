@@ -587,6 +587,21 @@ function checkForExpiredTaskDateAndTime(
   const currentDate = new Date();
 
   if (
+    dateForTask.getFullYear() >
+    currentDate.getFullYear()
+  )
+    return;
+  if (
+    dateForTask.getMonth() >
+    currentDate.getMonth()
+  )
+    return;
+  if (
+    dateForTask.getDate() > currentDate.getDate()
+  )
+    return;
+
+  if (
     dateForTask.getFullYear() <
     currentDate.getFullYear()
   ) {
